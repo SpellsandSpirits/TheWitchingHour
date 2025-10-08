@@ -5,14 +5,34 @@
 <title>000000000000001</title>
 <style>
   :root { color-scheme: dark; }
-  body{background:#000;color:#eee;margin:0;display:grid;place-items:center;
-       height:100svh;font:16px/1.5 system-ui,Segoe UI,Roboto,Arial}
-  .card{max-width:520px;width:92%;padding:28px;border:1px solid #333;
-        border-radius:16px;background:linear-gradient(180deg,#0b0b0b,#111);
-        box-shadow:0 10px 40px rgba(0,0,0,.6);text-align:center}
+  body{
+    background:#000;
+    color:#eee;
+    margin:0;
+    display:grid;
+    place-items:center;
+    height:100svh;
+    font:16px/1.5 system-ui,Segoe UI,Roboto,Arial;
+  }
+  .card{
+    max-width:520px;
+    width:92%;
+    padding:28px;
+    border:1px solid #333;
+    border-radius:16px;
+    background:linear-gradient(180deg,#0b0b0b,#111);
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
+    text-align:center;
+  }
   h1{letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
-  input,button{width:100%;padding:12px 14px;border-radius:10px;
-               border:1px solid #333;background:#0f0f0f;color:#eee}
+  input,button{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid #333;
+    background:#0f0f0f;
+    color:#eee;
+  }
   input{margin-top:10px}
   button{margin-top:12px;cursor:pointer}
   .msg{min-height:1.2em;margin-top:10px;color:#bdbdbd}
@@ -21,36 +41,34 @@
   <div class="card">
     <h1>PORTAL</h1>
     <form id="portal">
-      <input name="phrase" placeholder="speak the secret…" autocomplete="off" required>
+      <input id="phrase" name="phrase" placeholder="speak the secret…" autocomplete="off" required>
       <button type="submit">Submit</button>
       <div id="msg" class="msg"></div>
     </form>
   </div>
 
   <script>
-<script>
-  const WINNER_PATH = "/TheWitchingHour/251521231514/"; 
-  const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";
+    
+    const WINNER_PATH = "/TheWitchingHour/251521231514/"; // case-sensitive
+  
+    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";
+    // ====================
 
-  const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-  const fromBase64 = b64 => atob(b64);
+    const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const answer = atob(ANSW_B64);
 
-  document.getElementById('portal').addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const msg = document.getElementById('msg');
-    msg.textContent = "";
-    const typed = normalize(e.target.phrase.value);
-    const answer = fromBase64(ANSW_B64);
+    document.getElementById('portal').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      const typedRaw = document.getElementById('phrase').value;
+      const typed = normalize(typedRaw);
 
-    if (typed === answer) {
-      location.href = WINNER_PATH + "?token=ok";
-    } else {
-      msg.textContent = "…nothing happens.";
-    }
-  });
-</script>
-
+      if (typed === answer) {
+        location.href = WINNER_PATH + "?token=ok&v=" + Date.now();
+      } else {
+        msg.textContent = "…nothing happens.";
+      }
+    });
   </script>
 </body>
 </html>
-
