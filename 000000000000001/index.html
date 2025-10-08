@@ -3,14 +3,60 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>000000000000001</title>
-<body style="background:#000;color:#eee;font-family:system-ui;display:grid;place-items:center;height:100svh;margin:0">
-  <main style="max-width:520px;text-align:center">
-    <h1>Portal</h1>
-    <p>The air thrums with hidden power…</p>
-    <form>
-      <input placeholder="speak the secret…" style="width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#0f0f0f;color:#eee">
-      <button style="margin-top:10px;padding:10px 16px;border-radius:10px;border:1px solid #333;background:#121212;color:#eee">Submit</button>
+<style>
+  :root { color-scheme: dark; }
+  body{background:#000;color:#eee;margin:0;display:grid;place-items:center;
+       height:100svh;font:16px/1.5 system-ui,Segoe UI,Roboto,Arial}
+  .card{max-width:520px;width:92%;padding:28px;border:1px solid #333;
+        border-radius:16px;background:linear-gradient(180deg,#0b0b0b,#111);
+        box-shadow:0 10px 40px rgba(0,0,0,.6);text-align:center}
+  h1{letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
+  input,button{width:100%;padding:12px 14px;border-radius:10px;
+               border:1px solid #333;background:#0f0f0f;color:#eee}
+  input{margin-top:10px}
+  button{margin-top:12px;cursor:pointer}
+  .msg{min-height:1.2em;margin-top:10px;color:#bdbdbd}
+</style>
+<body>
+  <div class="card">
+    <h1>PORTAL</h1>
+    <form id="portal">
+      <input name="phrase" placeholder="speak the secret…" autocomplete="off" required>
+      <button type="submit">Submit</button>
+      <div id="msg" class="msg"></div>
     </form>
-  </main>
+  </div>
+
+  <script>
+    // ====== CONFIG — set these two values ======
+    const SECRET_HASH_HEX = "da530cff1c73ceffff36802c357697443f71da1cbb2882b43ea850069ed6d88c";   // from the console hash helper
+    const WINNER_PATH = "/TheWitchingHour/251521231514/"; // hidden winner folder path
+    // ===========================================
+
+    const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    async function sha256Hex(s){
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+      return [...new Uint8Array(buf)]
+             .map(b=>b.toString(16).padStart(2,"0")).join("");
+    }
+
+    document.getElementById('portal').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.textContent = "";
+      const phrase = normalize(e.target.phrase.value);
+      try{
+        const hash = await sha256Hex(phrase);
+        if(hash === SECRET_HASH_HEX){
+          location.href = WINNER_PATH + "?token=ok";
+        }else{
+          msg.textContent = "…nothing happens.";
+        }
+      }catch(_){
+        msg.textContent = "the veil resists you.";
+      }
+    });
+  </script>
 </body>
 </html>
+
