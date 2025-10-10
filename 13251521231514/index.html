@@ -1,1 +1,51 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Witch’s Curse</title>
+<style>
+  :root { color-scheme: dark; }
+  body{
+    background:#000;color:#eee;margin:0;display:grid;place-items:center;height:100svh;
+    font:16px/1.5 system-ui,Segoe UI,Roboto,Arial;
+  }
+  .card{
+    max-width:640px;width:92%;padding:28px;border:1px solid #333;border-radius:16px;
+    background:linear-gradient(180deg,#0b0b0b,#111);box-shadow:0 8px 40px rgba(0,0,0,.6);text-align:center;
+  }
+  h1{margin:0 0 8px}
+  p{margin:0 0 12px}
+  input,button{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid #333;background:#0f0f0f;color:#eee;
+  }
+  input{margin-top:10px}
+  button{margin-top:12px;cursor:pointer}
+  .msg{min-height:1.2em;margin-top:10px;color:#bbb}
+</style>
+<body>
+  <div class="card">
+    <h1>You have broken the witch’s curse.</h1>
+    <p>Enter your name so all can thank you.</p>
+
+    <form id="win">
+      <input id="name" name="name" placeholder="team / champion name" autocomplete="off" required>
+      <button type="submit">Submit</button>
+      <div id="msg" class="msg"></div>
+    </form>
+  </div>
+
+  <script>
+    // For now we just move to a "stand by" page and pass the name along.
+    const SUCCESS_PATH = "/TheWitchingHour/13251521231514/trigger.html";
+
+    document.getElementById('win').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const n = (document.getElementById('name').value || "").trim();
+      if(!n){ document.getElementById('msg').textContent = "Speak your name."; return; }
+      // URL-encode the name so we can show it on the next page
+      location.href = SUCCESS_PATH + "?name=" + encodeURIComponent(n) + "&v=" + Date.now();
+    });
+  </script>
+</body>
+</html>
 
