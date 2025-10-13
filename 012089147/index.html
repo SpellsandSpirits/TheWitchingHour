@@ -65,9 +65,10 @@
     font-size: 14px;
     margin-top: 8px;
     color: #c25b5b; /* default = error red */
+    transition: color 0.3s ease;
   }
   .msg.success {
-    color: #7ae7a7;
+    color: rgba(255, 0, 80, 0.85); /* glowing red to match rune */
   }
   .sigil {
     display: none;
@@ -94,11 +95,9 @@
 </div>
 
 <script>
-  // --- Customize per puzzle ---
-  const TOP_LABEL = "01";                 // shown small at the top
-  const RUNE_SRC = "./Rune_Othala.png";   // rune image in the same folder
+  const TOP_LABEL = "01";
+  const RUNE_SRC = "./Rune_Othala.png";
 
-  // Accept “thing” and “the thing” (case/space/punct-insensitive)
   const ACCEPTED_HASHES = [
     "5de94d691ae3039a3f5d362fea9a35964fe0cc4ae44a6a84266d3614755c69b2", // "thing"
     "5438f17843560df7b7e62330c3894a0ce6c0ac57c52eb844e1cb9db40578e2fa"  // "thething"
@@ -145,7 +144,6 @@
     }
   });
 
-  // Autofocus
   setTimeout(() => input && input.focus(), 50);
 </script>
 </body>
