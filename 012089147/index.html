@@ -7,73 +7,28 @@
 <style>
   :root { color-scheme: dark; }
   html, body {
-    margin: 0;
-    height: 100%;
-    background: #0b0b0d;
-    color: #eae9ef;
+    margin: 0; height: 100%;
+    background: #0b0b0d; color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   }
-  .wrap {
-    max-width: 720px;
-    margin: 10vh auto;
-    padding: 0 20px;
-    text-align: center;
-  }
-  .toplabel {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: #9b98a7;
-    opacity: 0.8;
-    margin-bottom: 10px;
-  }
-  .q {
-    font-size: clamp(22px, 4.6vw, 34px);
-    font-weight: 700;
-    margin: 8px 0 18px;
-  }
+  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
+  .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:10px; }
+  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; }
   form { margin: 8px auto 6px; }
-  input[type="text"] {
-    background: #121217;
-    border: 1px solid #242432;
-    color: #eae9ef;
-    padding: 12px 14px;
-    border-radius: 10px;
-    outline: none;
-    width: 100%;
-    max-width: 360px;
+  input[type="text"]{
+    background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px;
+    width:100%; max-width:360px;
   }
-  input::placeholder { color: #8a8996; }
-  button {
-    background: #2a2834;
-    border: 1px solid #3a3847;
-    color: #eae9ef;
-    padding: 10px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    text-transform: lowercase;
-    margin-top: 10px;
-    width: 100%;
-    max-width: 360px;
+  input::placeholder{ color:#8a8996; }
+  button{
+    background:#2a2834; border:1px solid #3a3847; color:#eae9ef; padding:10px 14px; border-radius:10px;
+    cursor:pointer; text-transform:lowercase; margin-top:10px; width:100%; max-width:360px;
   }
-  button:hover { background: #343244; }
-  .msg {
-    min-height: 24px;
-    font-size: 14px;
-    margin-top: 8px;
-    color: #c25b5b; /* default (error) */
-    transition: color 0.3s ease;
-  }
-  .msg.success {
-    color: #f5c473; /* gold/amber success */
-  }
-  .sigil {
-    display: none;
-    margin: 24px auto 0;
-    max-width: min(80vw, 520px);
-    filter: drop-shadow(0 0 20px rgba(255, 0, 80, 0.25)); /* keep the red glow on the image */
-  }
+  button:hover{ background:#343244; }
+  .msg{ min-height:24px; font-size:14px; margin-top:8px; color:#c25b5b; transition:color .3s ease; }
+  .msg.success{ color:#f5c473; } /* gold/amber */
+  .sigil{ display:none; margin:24px auto 0; max-width:min(80vw,520px); filter:drop-shadow(0 0 20px rgba(255,0,80,.25)); }
 </style>
 </head>
 <body>
@@ -91,24 +46,26 @@
 </div>
 
 <script>
+  // --- per-page settings ---
   const TOP_LABEL = "01";
   const RUNE_SRC = "./Rune_Othala.png";
+  document.getElementById("toplabel").textContent = TOP_LABEL;
 
-  // Accept “thing” and “the thing” (normalized: lowercase, no non-alphanumerics)
-  const ACCEPTED_HASHES = [
-    "5de94d691ae3039a3f5d362fea9a35964fe0cc4ae44a6a84266d3614755c69b2", // "thing"
-    "4781fe4aea4fda38274267556e4738729d6fcd2a5b5dcb4834fdff731b0a44d0"  // "thething"
+  // Obfuscation: reverse string, XOR each char code with repeating key, join as comma string.
+  const KEY = [7,13,31];
+  const ACCEPTED_OBF = [
+    "96,99,118,111,121",                 // obf("thing")
+    "96,99,118,111,121,122,111,121"      // obf("thething")
   ];
 
-  function normalize(s) {
-    return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  function normalize(s){
+    return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
   }
-
-  async function sha256Hex(str) {
-    const enc = new TextEncoder();
-    const data = enc.encode(str);
-    const hash = await crypto.subtle.digest("SHA-256", data);
-    return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+  function obf(s){
+    const n = normalize(s);
+    const rev = n.split("").reverse();
+    const codes = rev.map((ch,i)=> ch.charCodeAt(0) ^ KEY[i % KEY.length]);
+    return codes.join(",");
   }
 
   const form = document.getElementById("puzzleForm");
@@ -116,30 +73,33 @@
   const msg   = document.getElementById("message");
   const sigil = document.getElementById("sigil");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.textContent = "";
+  function showError(text){
+    msg.textContent = text;
     msg.classList.remove("success");
-    const candidate = normalize(input.value);
-    if (!candidate) { msg.textContent = "enter an answer."; return; }
+    sigil.style.display = "none";
+    sigil.removeAttribute("src");
+  }
 
-    const h = await sha256Hex(candidate);
-    const ok = ACCEPTED_HASHES.includes(h);
+  form.addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const candidate = input.value;
+    if(!candidate){ showError("enter an answer."); return; }
 
-    if (ok) {
+    const token = obf(candidate);
+    const ok = ACCEPTED_OBF.includes(token);
+
+    if(ok){
       msg.textContent = "You have discovered a rune.";
       msg.classList.add("success");
       sigil.src = RUNE_SRC;
       sigil.style.display = "block";
       input.disabled = true;
-    } else {
-      msg.textContent = "try again.";
-      sigil.style.display = "none";
-      sigil.removeAttribute("src");
+    }else{
+      showError("try again.");
     }
   });
 
-  setTimeout(() => input && input.focus(), 50);
+  setTimeout(()=> input && input.focus(), 50);
 </script>
 </body>
 </html>
