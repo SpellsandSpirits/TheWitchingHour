@@ -12,28 +12,61 @@
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   }
-  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
-  .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:10px; }
-  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; }
+  .wrap {
+    max-width: 720px;
+    margin: 10vh auto;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .toplabel {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #9b98a7;
+    opacity: 0.8;
+    margin-bottom: 10px;
+  }
+  .q {
+    font-size: clamp(22px, 4.6vw, 34px);
+    font-weight: 700;
+    margin: 8px 0 18px;
+  }
   form { margin: 8px auto 6px; }
   input[type="text"]{
-    background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px;
+    background:#121217; border:1px solid #242432; color:#eae9ef;
+    padding:12px 14px; border-radius:10px; outline:none;
     width:100%; max-width:360px;
   }
   input::placeholder{ color:#8a8996; }
   button{
-    background:#2a2834; border:1px solid #3a3847; color:#eae9ef; padding:10px 14px; border-radius:10px;
-    cursor:pointer; text-transform:lowercase; margin-top:10px; width:100%; max-width:360px;
+    background:#2a2834; border:1px solid #3a3847; color:#eae9ef;
+    padding:10px 14px; border-radius:10px; cursor:pointer;
+    text-transform:lowercase; margin-top:10px; width:100%; max-width:360px;
   }
   button:hover{ background:#343244; }
-  .msg{ min-height:24px; font-size:14px; margin-top:32px; color:#c25b5b; transition:color .3s ease; }
+
+  /* results block sits below the form, gives consistent spacing */
+  .result { margin-top: 32px; }
+
+  .msg{
+    font-size:14px; margin-bottom:14px;
+    color:#c25b5b; /* default = error red */
+    transition: color .3s ease, opacity .3s ease;
+  }
   .msg.success{ color:#f5c473; } /* gold/amber */
-  .sigil{ display:none; margin:24px auto 0; max-width:min(80vw,520px); filter:drop-shadow(0 0 20px rgba(255,0,80,.25)); }
+
+  .sigil{
+    display:none; opacity:0;
+    margin:18px auto 0; max-width:min(80vw,520px);
+    filter: drop-shadow(0 0 20px rgba(255, 0, 80, 0.25));
+    transition: opacity 0.8s ease;
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
+
   <div class="q">Q. What is the name of the hand in the Addams Family?</div>
 
   <form id="puzzleForm" autocomplete="off">
@@ -41,8 +74,10 @@
     <button type="submit">submit</button>
   </form>
 
-  <div class="msg" id="message"></div>
-  <img id="sigil" class="sigil" alt="sigil unlocked" />
+  <div class="result">
+    <div class="msg" id="message"></div>
+    <img id="sigil" class="sigil" alt="sigil unlocked" />
+  </div>
 </div>
 
 <script>
@@ -51,11 +86,15 @@
   const RUNE_SRC = "./Rune_Othala.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
-  // Obfuscation: reverse string, XOR each char code with repeating key, join as comma string.
+  // Obfuscation: normalize -> reverse -> XOR each char with repeating key -> join as comma string
+  // (keeps literal answers out of source; not cryptographic, just enough to stop casual peeking)
   const KEY = [7,13,31];
+
+  // Accept “thing” and “the thing” in any case/spacing/punctuation
+  // These are obf("thing") and obf("thething")
   const ACCEPTED_OBF = [
-    "96,99,118,111,121",                 // obf("thing")
-    "96,99,118,111,121,122,111,121"      // obf("thething")
+    "96,99,118,111,121",
+    "96,99,118,111,121,122,111,121"
   ];
 
   function normalize(s){
@@ -76,8 +115,7 @@
   function showError(text){
     msg.textContent = text;
     msg.classList.remove("success");
-    sigil.style.display = "none";
-    sigil.removeAttribute("src");
+    // rune stays hidden if not yet discovered
   }
 
   form.addEventListener("submit",(e)=>{
@@ -91,14 +129,19 @@
     if(ok){
       msg.textContent = "You have discovered a rune.";
       msg.classList.add("success");
+
       sigil.src = RUNE_SRC;
       sigil.style.display = "block";
-      input.disabled = true;
+      // fade in next frame so CSS transition applies
+      requestAnimationFrame(()=> { sigil.style.opacity = "1"; });
+
+      input.disabled = true; // lock after success
     }else{
       showError("try again.");
     }
   });
 
+  // focus for convenience
   setTimeout(()=> input && input.focus(), 50);
 </script>
 </body>
