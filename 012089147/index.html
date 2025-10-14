@@ -48,20 +48,20 @@
   .result { margin-top: 32px; }
 
   .msg{
-    font-size:14px; margin-bottom:8px; /* tighter gap above rune */
-    color:#c25b5b; /* default = error red */
-    opacity: 0;          /* start hidden; will fade in on success */
+    font-size:14px; margin-bottom:8px;
+    color:#c25b5b;
+    opacity: 0;
     transition: opacity 1s ease, color .3s ease;
   }
-  .msg.success { color:#f5c473; } /* gold/amber */
-  .msg.show    { opacity: 1; }    /* fade-in toggle */
+  .msg.success { color:#f5c473; }
+  .msg.show    { opacity: 1; } 
 
   .sigil{
     display:none; opacity:0;
-    margin:6px auto 0;  /* tighter gap below message */
+    margin:6px auto 0; 
     max-width:min(80vw,520px);
     filter: drop-shadow(0 0 20px rgba(255, 0, 80, 0.25));
-    transition: opacity 1s ease;  /* 1 second fade */
+    transition: opacity 1s ease; 
   }
 </style>
 </head>
@@ -69,7 +69,7 @@
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">Q. What is the name of the hand in the Addams Family?</div>
+  <div class="q">What is the name of the hand in the Addams Family?</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="whisper the counterspell" aria-label="answer" />
@@ -83,16 +83,16 @@
 </div>
 
 <script>
-  // --- per-page settings ---
+ 
   const TOP_LABEL = "01";
   const RUNE_SRC = "./Rune_Othala.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
-  // Lightweight obfuscation (normalize->reverse->XOR->join)
+  
   const KEY = [7,13,31];
   const ACCEPTED_OBF = [
-    "96,99,118,111,121",                 // obf("thing")
-    "96,99,118,111,121,122,111,121"      // obf("thething")
+    "96,99,118,111,121",               
+    "96,99,118,111,121,122,111,121"    
   ];
 
   function normalize(s){
@@ -112,8 +112,7 @@
 
   function showError(text){
     msg.textContent = text;
-    msg.classList.remove("success","show"); // show immediately without fade
-    // keep message visible (no fade) on errors:
+    msg.classList.remove("success","show"); 
     msg.style.opacity = 1;
   }
 
@@ -126,19 +125,19 @@
     const ok = ACCEPTED_OBF.includes(token);
 
     if(ok){
-      // reset state to allow a clean fade
+      
       msg.classList.remove("success","show");
       msg.style.opacity = 0;
       msg.textContent = "You have discovered a rune.";
 
-      // next frame: add classes to trigger 1s fade-in
+      
       requestAnimationFrame(()=>{
-        msg.classList.add("success","show"); // gold color + fade-in
+        msg.classList.add("success","show"); 
       });
 
       sigil.src = RUNE_SRC;
       sigil.style.display = "block";
-      requestAnimationFrame(()=> { sigil.style.opacity = "1"; }); // 1s fade
+      requestAnimationFrame(()=> { sigil.style.opacity = "1"; }); 
 
       input.disabled = true;
     }else{
