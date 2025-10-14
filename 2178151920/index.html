@@ -23,22 +23,29 @@
     font-size: clamp(22px, 4.6vw, 34px);
     font-weight: 700;
     margin-bottom: 8px;
-    line-height: 1.2; /* tighter spacing between lines */
+    line-height: 1.2; /* tighter title spacing */
   }
-  .q-hints {
+
+  /* proper bullet list with hanging indent */
+  .q-list {
     font-size: clamp(14px, 2vw, 18px);
     font-weight: 400;
     letter-spacing: normal;
     color: #c9c7d4;
     line-height: 1.6;
     text-align: left;
-    display: inline-block;
+    display: inline-block;   /* keeps the list centered under the title */
     margin-top: 8px;
+    padding-left: 1.25rem;   /* space for the bullet marker */
+    list-style: disc;
+    list-style-position: outside;
   }
+  .q-list li { margin: 6px 0; }
+  .q-list li::marker { color:#c9c7d4; }
 
   /* extra breathing room before form */
   form { 
-    margin: 50px auto 6px;
+    margin: 64px auto 6px;
   }
 
   input[type="text"]{
@@ -57,11 +64,11 @@
   /* message: start hidden, fade via inline opacity changes */
   .msg{
     font-size:14px; margin-bottom:8px;
-    color:#c25b5b;                   /* default = error red */
-    opacity: 0;                      /* start hidden */
+    color:#c25b5b;
+    opacity: 0;
     transition: opacity 1s ease, color .3s ease;
   }
-  .msg.success { color:#f5c473; }    /* gold/amber on success */
+  .msg.success { color:#f5c473; }
 
   /* rune fades in too */
   .sigil{
@@ -77,20 +84,20 @@
   <div class="toplabel" id="toplabel">21</div>
 
   <div class="q">
-    <div class="q-label">Unscramble the title of this horror film by solving for these letters:</div>
-    <div class="q-hints"><br>
-      • Third letter of Ghost<br>
-      • Last letter of Turmoil<br>
-      • The last letter of the first name of the true Bay Harbor Butcher<br>
-      • Third to last letter of Skeleton<br>
-      • The bookender letter of Edgar Allan Poe<br>
-      • The penultimate letter of Nosferatu<br>
-      • The fourth letter of Pumpkin<br>
-      • Last letter of Zombie<br>
-      • First letter of the first name of the protagonist in Sleepy Hollow<br>
-      • The fourth letter in a synonym of Scare that rhymes with Night<br>
-      • The first letter of the last name of the author of the Goosebumps book series.
-    </div>
+    <div class="q-label">Unscramble the title of this horror film by solving for the letters below:</div>
+    <ul class="q-list">
+      <li>Third letter of Ghost</li>
+      <li>Last letter of Turmoil</li>
+      <li>The last letter of the first name of the true Bay Harbor Butcher</li>
+      <li>Third to last letter of Skeleton</li>
+      <li>The bookender letter of Edgar Allan Poe</li>
+      <li>The penultimate letter of Nosferatu</li>
+      <li>The fourth letter of Pumpkin</li>
+      <li>Last letter of Zombie</li>
+      <li>First letter of the first name of the protagonist in Sleepy Hollow</li>
+      <li>The fourth letter in a synonym of scare that rhymes with night</li>
+      <li>The first letter of the last name of the author of the Goosebumps book series.</li>
+    </ul>
   </div>
 
   <form id="puzzleForm" autocomplete="off">
