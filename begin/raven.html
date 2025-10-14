@@ -2,57 +2,59 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Raven</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
-    margin: 0;
-    height: 100%;
+    margin: 0; height: 100%;
     background: #000;
-    overflow: hidden;
+    color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-    color: #eae9ef;
+    overflow: hidden;
   }
-
-  body {
+  .wrap {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-  }
-
-  img {
-    width: 100vw;
+    justify-content: center;
     height: 100vh;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-    animation: fadeIn 2s ease forwards;
+    text-align: center;
+    position: relative;
   }
 
-  .tagline {
-    position: absolute;
-    bottom: 15vh;
+  /* Raven image */
+  .raven {
     width: 100%;
-    text-align: center;
-    font-size: clamp(15px, 2vw, 18px);
-    letter-spacing: 0.06em;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: fadeIn 2.5s ease forwards;
+  }
+
+  /* Message fades in after a pause */
+  .message {
+    position: absolute;
+    bottom: 40px;
+    font-size: clamp(12px, 2vw, 16px);
     color: #eae9ef;
+    letter-spacing: .05em;
     opacity: 0;
     animation: fadeIn 2s ease forwards;
+    animation-delay: 3s;
   }
 
   @keyframes fadeIn {
     from { opacity: 0; }
-    to { opacity: 1; }
+    to   { opacity: 1; }
   }
 </style>
 </head>
 <body>
-  <img src="./raven.png" alt="Raven reveals the number 23">
-  <div class="tagline">May the moon guide your path.</div>
-  <div class="subline">Lest you forget.</div>
+<div class="wrap">
+  <img src="raven.png" alt="A raven under the moon" class="raven" />
+  <div class="message">May the moon guide your path. Lest you forget.</div>
+</div>
 </body>
 </html>
