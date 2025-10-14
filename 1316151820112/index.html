@@ -25,18 +25,14 @@
     margin-bottom:15px;
   }
 
+  /* Minimal title like your .q */
   .q {
     font-size: clamp(22px, 4.6vw, 34px);
     font-weight: 700;
     margin: 8px 0 12px;
     line-height: 1.2;
-  }
-
-  .q-sub {
-    font-size: clamp(14px, 2vw, 18px);
-    color:#c9c7d4;
-    opacity:.9;
-    margin-top: 6px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
   }
 
   /* Portal card */
@@ -47,4 +43,88 @@
     padding: 32px;
     border: 1px solid #3a3847;
     border-radius: 16px;
-    b
+    background: linear-gradient(180deg, #0b0b0d, #121217);
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+    text-align: center;
+  }
+
+  form { margin: 12px auto 6px; }
+
+  input, button {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #3a3847;
+    background: #121217;
+    color: #eae9ef;
+  }
+
+  /* no placeholder, super minimal */
+  input { margin-top: 10px; }
+  button {
+    margin-top: 12px;
+    cursor: pointer;
+    background: #2a2834;
+    text-transform: lowercase;
+  }
+  button:hover { background: #343244; }
+
+  .msg {
+    min-height: 1.2em;
+    margin-top: 12px;
+    color: #bdbdbd;
+    opacity: 0;                      /* hidden until we show it */
+    transition: opacity .3s ease, color .3s ease;
+  }
+  .msg.show { opacity: 1; }
+  .msg.success { color: #f5c473; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toplabel" id="toplabel">13</div>
+
+    <div class="card">
+      <div class="q">PORTAL</div>
+      <form id="portal" autocomplete="off">
+        <input id="phrase" name="phrase" aria-label="phrase" required>
+        <button type="submit">submit</button>
+        <div id="msg" class="msg" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== knobs =====
+    const TOP_LABEL = "13";
+    const WINNER_PATH = "/TheWitchingHour/13251521231514/"; // case-sensitive path
+    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";         // "areyouafraidofthedark" (normalized)
+    document.getElementById('toplabel').textContent = TOP_LABEL;
+
+    // ===== logic =====
+    const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const answer = atob(ANSW_B64);
+
+    const form = document.getElementById('portal');
+    const input = document.getElementById('phrase');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const typed = normalize(input.value);
+
+      if (typed === answer) {
+        msg.textContent = "The circle closes. The curse is broken.";
+        msg.classList.add("show","success");
+        setTimeout(()=>{
+          location.href = WINNER_PATH + "?token=ok&v=" + Date.now();
+        }, 500);
+      } else {
+        msg.textContent = "…nothing happens.";
+        msg.classList.add("show");
+        msg.classList.remove("success");
+      }
+    });
+  </script>
+</body>
+</html>
