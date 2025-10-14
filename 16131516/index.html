@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>16</title>
+<!-- (Optional) Preload so it appears instantly on success -->
+<link rel="preload" as="image" href="./Rune_Ansuz.png">
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -16,9 +18,7 @@
   .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:10px; }
 
   /* question + hint styling */
-  .q {
-    margin: 8px 0 18px;
-  }
+  .q { margin: 8px 0 18px; }
   .q-label {
     font-size: clamp(22px, 4.6vw, 34px);
     font-weight: 700;
@@ -35,11 +35,9 @@
     margin-top: 8px;
   }
 
-  form { 
-    margin-top: 48px;   /* increase/decrease this for more/less space */
-    margin-right: auto;
-    margin-bottom: 6px;
-    margin-left: auto;
+  /* breathing room before form */
+  form { margin: 8px auto 6px; } /* adjust margin-top as desired */
+
   input[type="text"]{
     background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px; outline:none;
     width:100%; max-width:360px;
@@ -62,9 +60,12 @@
   }
   .msg.success { color:#f5c473; }    /* gold/amber on success */
 
+  /* ensure truly hidden until we reveal */
+  [hidden] { display: none !important; }
+
   /* rune fades in too */
   .sigil{
-    display:none; opacity:0;
+    opacity:0;
     margin:6px auto 0; max-width:min(80vw,520px);
     filter: drop-shadow(0 0 20px rgba(255, 0, 80, .25));
     transition: opacity 1s ease;
@@ -78,7 +79,7 @@
   <div class="q">
     <div class="q-label">Fill in the Blank:</div>
     <div class="q-hints">
-     A broom, a vacuum and a  ____ are the modes of transportation for the Sanderson Sisters.
+     A broom, a vacuum and a ____ are the modes of transportation for the Sanderson Sisters.
     </div>
   </div>
 
@@ -89,21 +90,22 @@
 
   <div class="result">
     <div class="msg" id="message"></div>
-    <img id="sigil" class="sigil" alt="sigil unlocked" />
+    <!-- Start hidden; we’ll unhide only after the image loads -->
+    <img id="sigil" class="sigil" alt="sigil unlocked" hidden />
   </div>
 </div>
 
 <script>
   // --- per-page knobs ---
   const TOP_LABEL = "16";
-  const RUNE_SRC = "./Rune_Ansuz.png";
+  const RUNE_SRC = "./Rune_Ansuz.png"; // ensure exact filename & path
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
- const ENCODED_ANSWERS = [
-  "YW1vcA==",
-  "bW9w"
-];
+  const ENCODED_ANSWERS = [
+    "bW9w",       // "mop"
+    "YW1vcA=="    // "a mop" -> normalized -> "amop"
+  ];
 
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
@@ -115,6 +117,7 @@
   function showError(text){
     msg.textContent = text;
     msg.classList.remove("success");
+    // show immediately (no fade)
     msg.style.opacity = 1;
   }
 
@@ -126,15 +129,27 @@
     const ok = ENCODED_ANSWERS.includes(btoa(candidate));
 
     if(ok){
+      // Message: set text, success color, then fade from 0 -> 1
       msg.textContent = "You have revealed a rune.";
       msg.classList.add("success");
       msg.style.opacity = 0;
-      requestAnimationFrame(()=>{ msg.style.opacity = 1; });
+      requestAnimationFrame(()=>{ msg.style.opacity = 1; }); // 1s fade
 
-      sigil.src = RUNE_SRC;
-      sigil.style.display = "block";
+      // Prepare image reveal:
       sigil.style.opacity = 0;
-      requestAnimationFrame(()=>{ sigil.style.opacity = 1; });
+
+      // Set handlers *before* setting src
+      sigil.onload = () => {
+        sigil.removeAttribute('hidden');      // now that it's loaded, unhide
+        // keep display block (img default) and fade it in
+        requestAnimationFrame(()=>{ sigil.style.opacity = 1; });
+      };
+      sigil.onerror = () => {
+        showError("rune image missing (check filename/path).");
+      };
+
+      // Trigger load
+      sigil.src = RUNE_SRC;
 
       input.disabled = true;
     } else {
@@ -146,4 +161,3 @@
 </script>
 </body>
 </html>
-
