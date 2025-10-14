@@ -97,8 +97,8 @@
     const candidate = normalize(input.value);
     if(!candidate){ showError("enter an answer."); return; }
 
-    const ok = ACCEPTED_NORMALIZED.includes(candidate);
-
+  const ok = ENCODED_ANSWERS.includes(btoa(candidate));
+    
     if(ok){
       // Message: set text, success color, then fade from 0 -> 1
       msg.textContent = "You have revealed a rune.";
