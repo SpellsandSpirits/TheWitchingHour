@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>The Raven</title>
 <style>
   :root { color-scheme: dark; }
+
+  /* lock the page and use stable viewport height to prevent scroll bounce */
   html, body {
-    margin: 0; height: 100%;
+    margin: 0;
+    height: 100%;
     background: #000;
     color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -15,50 +18,50 @@
     overflow: hidden;
   }
 
-  .wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    text-align: center;
-    position: relative;
+  /* full-screen stage pinned to the viewport */
+  .stage {
+    position: fixed; /* pin to viewport */
+    inset: 0;        /* top/right/bottom/left: 0 */
+    width: 100vw;
+    height: 100svh;  /* small viewport height: avoids mobile UI jitter */
+    display: grid;
+    place-items: center;
   }
 
-  /* Raven image */
+  /* image fills the stage */
   .raven {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     opacity: 0;
     animation: fadeIn 2.5s ease forwards;
+    z-index: 1; /* behind the text */
   }
 
-  /* Message container */
+  /* message overlays the image, anchored near bottom */
   .message {
     position: absolute;
-    bottom: 40px;
+    bottom: 8vh;     /* move closer/farther from bottom here */
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px; /* small gap between lines */
+    gap: 4px;        /* space between the two lines */
+    z-index: 2;      /* ensure it sits above the image */
+    pointer-events: none; /* taps pass through (purely visual) */
+    text-align: center;
   }
 
   .line {
     font-size: clamp(12px, 2vw, 16px);
-    color: #eae9ef;
     letter-spacing: .05em;
     opacity: 0;
     animation: fadeIn 2s ease forwards;
   }
-
-  .line.second {
-    animation-delay: 4s; /* fades in after the first line */
-  }
-
-  .line.first {
-    animation-delay: 3s;
-  }
+  .line.first  { animation-delay: 2.6s; } /* appears after image starts fading */
+  .line.second { animation-delay: 3.8s; } /* appears after the first line */
 
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -67,12 +70,12 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-  <img src="raven.png" alt="A raven under the moon" class="raven" />
-  <div class="message">
-    <div class="line first">May the moon guide your path.</div>
-    <div class="line second">Lest you forget.</div>
+  <div class="stage">
+    <img src="./raven.png" alt="A raven under the moon" class="raven" />
+    <div class="message">
+      <div class="line first">May the moon guide your path.</div>
+      <div class="line second">Lest you forget.</div>
+    </div>
   </div>
-</div>
 </body>
 </html>
