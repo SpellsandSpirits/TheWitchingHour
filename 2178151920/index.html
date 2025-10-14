@@ -1,1 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>21</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body {
+    margin: 0; height: 100%;
+    background: #0b0b0d; color: #eae9ef;
+    font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  }
+  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
+  .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:10px; }
 
+  /* question + anagram styling */
+  .q {
+    margin: 8px 0 18px;
+  }
+  .q-label {
+    font-size: clamp(22px, 4.6vw, 34px);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .q-anagram {
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    font-size: clamp(28px, 6vw, 40px);
+    color: #d0ced9;
+    opacity: 0.9;
+  }
+
+  form { margin: 8px auto 6px; }
+  input[type="text"]{
+    background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px; outline:none;
+    width:100%; max-width:360px;
+  }
+  input::placeholder{ color:#8a8996; }
+  button{
+    background:#2a2834; border:1px solid #3a3847; color:#eae9ef; padding:10px 14px; border-radius:10px; cursor:pointer;
+    text-transform:lowercase; margin-top:10px; width:100%; max-width:360px;
+  }
+  button:hover{ background:#343244; }
+
+  .result { margin-top: 32px; }
+
+  /* message: start hidden, fade via inline opacity changes */
+  .msg{
+    font-size:14px; margin-bottom:8px;
+    color:#c25b5b;                   /* default = error red */
+    opacity: 0;                      /* start hidden */
+    transition: opacity 1s ease, color .3s ease;
+  }
+  .msg.success { color:#f5c473; }    /* gold/amber on success */
+
+  /* rune fades in too */
+  .sigil{
+    display:none; opacity:0;
+    margin:6px auto 0; max-width:min(80vw,520px);
+    filter: drop-shadow(0 0 20px rgba(255, 0, 80, .25));
+    transition: opacity 1s ease;
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="toplabel" id="toplabel">01</div>
+
+ <div class="q">
+  <div class="q-label">Unscramble the title of this horror film::</div>
+  <div class="q-anagram">• Third letter of Ghost<br>• Last letter of Turmoil<br>• The last letter of the first name of the true Bay Harbor Butcher<br>• Third to last letter of Skeleton<br>• The bookender letter of Edgar Allan Poe<br>• The penultimate letter of Nosferatu<br>• The fourth letter of Pumpkin<br>• Last letter of Zombie<br>• First letter of the first name of the protagonist in Sleepy Hollow<br>• The fourth letter in a synonym of scare that rhymes with night<br>• The first letter of the last name of the author of the Goosebumps book series./div>
+</div>
+
+  <form id="puzzleForm" autocomplete="off">
+    <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
+    <button type="submit">submit</button>
+  </form>
+
+  <div class="result">
+    <div class="msg" id="message"></div>
+    <img id="sigil" class="sigil" alt="sigil unlocked" />
+  </div>
+</div>
+
+<script>
+  // --- per-page knobs ---
+  const TOP_LABEL = "21";
+  const RUNE_SRC = "./Rune_Jera.png";
+  document.getElementById("toplabel").textContent = TOP_LABEL;
+
+  // Accept these (case/space/punct-insensitive)
+const ENCODED_ANSWERS = [
+  "cG9sdGVyZ2Vpc3Q="
+];
+  const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
+
+  const form = document.getElementById("puzzleForm");
+  const input = document.getElementById("answerInput");
+  const msg   = document.getElementById("message");
+  const sigil = document.getElementById("sigil");
+
+  function showError(text){
+    msg.textContent = text;
+    msg.classList.remove("success");
+    // show immediately (no fade)
+    msg.style.opacity = 1;
+  }
+
+  form.addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const candidate = normalize(input.value);
+    if(!candidate){ showError("enter an answer."); return; }
+
+  const ok = ENCODED_ANSWERS.includes(btoa(candidate));
+    
+    if(ok){
+      // Message: set text, success color, then fade from 0 -> 1
+      msg.textContent = "You have revealed a rune.";
+      msg.classList.add("success");
+      msg.style.opacity = 0;
+      requestAnimationFrame(()=>{ msg.style.opacity = 1; }); // 1s fade
+
+      // Rune: show and fade in
+      sigil.src = RUNE_SRC;
+      sigil.style.display = "block";
+      sigil.style.opacity = 0;
+      requestAnimationFrame(()=>{ sigil.style.opacity = 1; }); // 1s fade
+
+      input.disabled = true;
+    } else {
+      showError("try again.");
+    }
+  });
+
+  setTimeout(()=> input && input.focus(), 50);
+</script>
+</body>
+</html>
