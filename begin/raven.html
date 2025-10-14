@@ -14,6 +14,7 @@
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
     overflow: hidden;
   }
+
   .wrap {
     display: flex;
     flex-direction: column;
@@ -33,15 +34,29 @@
     animation: fadeIn 2.5s ease forwards;
   }
 
-  /* Message fades in after a pause */
+  /* Message container */
   .message {
     position: absolute;
     bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px; /* small gap between lines */
+  }
+
+  .line {
     font-size: clamp(12px, 2vw, 16px);
     color: #eae9ef;
     letter-spacing: .05em;
     opacity: 0;
     animation: fadeIn 2s ease forwards;
+  }
+
+  .line.second {
+    animation-delay: 4s; /* fades in after the first line */
+  }
+
+  .line.first {
     animation-delay: 3s;
   }
 
@@ -54,7 +69,10 @@
 <body>
 <div class="wrap">
   <img src="raven.png" alt="A raven under the moon" class="raven" />
-  <div class="message">May the moon guide your path. Lest you forget.</div>
+  <div class="message">
+    <div class="line first">May the moon guide your path.</div>
+    <div class="line second">Lest you forget.</div>
+  </div>
 </div>
 </body>
 </html>
