@@ -28,12 +28,20 @@
   button:hover{ background:#343244; }
 
   .result { margin-top: 32px; }
-  .msg{ font-size:14px; margin-bottom:8px; color:#c25b5b; opacity:0; transition: opacity 1s ease, color .3s ease; }
-  .msg.success{ color:#f5c473; }
-  .msg.show{ opacity:1; }
+  .msg{
+    font-size:14px; margin-bottom:8px;
+    color:#c25b5b;                 /* default = error red */
+    opacity: 0;                    /* start hidden */
+    transition: opacity 1s ease, color .3s ease;
+  }
+  .msg.success { color:#f5c473; }  /* gold/amber */
+  .msg.show    { opacity: 1; }     /* revealed state */
+
   .sigil{
-    display:none; opacity:0; margin:6px auto 0; max-width:min(80vw,520px);
-    filter: drop-shadow(0 0 20px rgba(255,0,80,.25)); transition: opacity 1s ease;
+    display:none; opacity:0;
+    margin:6px auto 0; max-width:min(80vw,520px);
+    filter: drop-shadow(0 0 20px rgba(255, 0, 80, .25));
+    transition: opacity 1s ease;   /* 1s fade */
   }
 </style>
 </head>
@@ -55,18 +63,19 @@
 </div>
 
 <script>
+  /* -------- per-page knobs -------- */
   const TOP_LABEL = "01";
+  // Fallback file (only used if no inline rune snippet is present)
+  const RUNE_SRC = "./Rune_Othala.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
-  // same KEY used in your RunePacker (must match!)
-  const KEY = [7,13,31];
-
-  // accepts “thing” and “the thing” (case/space/punct-insensitive)
+  /* -------- answer obfuscation (no plain words in source) -------- */
+  const KEY = [7,13,31]; // must match RunePacker if you use it
+  // Accepts “thing” and “the thing” (case/space/punct-insensitive)
   const ACCEPTED_OBF = [
     "96,99,118,111,121",                 // obf("thing")
     "96,99,118,111,121,122,111,121"      // obf("thething")
   ];
-
   function normalize(s){ return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,""); }
   function obf(s){
     const n = normalize(s);
@@ -75,8 +84,9 @@
     return codes.join(",");
   }
 
-  /* === paste your rune snippet here === */
-  // (it will define RUNE_MIME, RUNE_PARTS, deobf(), buildRuneDataURL())
+  /* === paste your RunePacker snippet below this line (optional) ===
+     It will define: RUNE_MIME, RUNE_PARTS, deobf(), buildRuneDataURL()
+  ================================================================== */
   /* === Rune data for Rune_Othala.png (inline, obfuscated) === */
 const RUNE_MIME = "image/png";
 const RUNE_PARTS = [
@@ -249,6 +259,9 @@ function buildRuneDataURL(){
 }
 /* === end rune data === */
 
+  /* === end rune data === */
+
+  /* -------- page behavior -------- */
   const form = document.getElementById("puzzleForm");
   const input = document.getElementById("answerInput");
   const msg   = document.getElementById("message");
@@ -269,14 +282,18 @@ function buildRuneDataURL(){
     const ok = ACCEPTED_OBF.includes(token);
 
     if(ok){
-      // message fade
-      msg.textContent = "You have discovered a rune.";
+      // message fade-in
+      msg.textContent = "You have found a rune.";
       msg.classList.remove("success","show");
       msg.style.opacity = 0;
       requestAnimationFrame(()=>{ msg.classList.add("success","show"); });
 
-      // rune fade
-      sigil.src = buildRuneDataURL();     // <— uses the snippet you pasted
+      // rune fade-in (inline snippet preferred; fallback to file)
+      if (typeof buildRuneDataURL === "function") {
+        sigil.src = buildRuneDataURL();
+      } else {
+        sigil.src = RUNE_SRC;
+      }
       sigil.style.display = "block";
       requestAnimationFrame(()=> { sigil.style.opacity = "1"; });
 
