@@ -8,39 +8,35 @@
   :root { color-scheme: dark; }
 
   html, body {
-    margin: 0; height: 100%;
-    background: #0b0b0d; color: #eae9ef;
+    margin: 0;
+    height: 100%;
+    background: #0b0b0d;
+    color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   }
 
-  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
+  .wrap {
+    max-width: 720px;
+    margin: 10vh auto;
+    padding: 0 20px;
+    text-align: center;
+  }
 
   .toplabel {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .18em;
-    color:#9b98a7;
-    opacity:.8;
-    margin-bottom:15px;
+    color: #9b98a7;
+    opacity: .8;
+    margin-bottom: 15px;
   }
 
-  /* Minimal title like your .q */
-  .q {
-    font-size: clamp(22px, 4.6vw, 34px);
-    font-weight: 700;
-    margin: 8px 0 12px;
-    line-height: 1.2;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-  }
-
-  /* Portal card */
   .card {
     max-width: 560px;
     width: 100%;
-    margin: 40px auto 0;
-    padding: 32px;
+    margin: 60px auto 0;
+    padding: 40px;
     border: 1px solid #3a3847;
     border-radius: 16px;
     background: linear-gradient(180deg, #0b0b0d, #121217);
@@ -48,34 +44,57 @@
     text-align: center;
   }
 
-  form { margin: 12px auto 6px; }
+  .q {
+    font-size: clamp(22px, 4.6vw, 34px);
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
 
-  input, button {
+  form {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input {
     width: 100%;
+    max-width: 360px;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #3a3847;
     background: #121217;
     color: #eae9ef;
+    text-align: center;
+    box-sizing: border-box;
   }
 
-  /* no placeholder, super minimal */
-  input { margin-top: 10px; }
   button {
-    margin-top: 12px;
-    cursor: pointer;
+    width: 100%;
+    max-width: 360px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #3a3847;
     background: #2a2834;
+    color: #eae9ef;
     text-transform: lowercase;
+    cursor: pointer;
+    box-sizing: border-box;
   }
+
   button:hover { background: #343244; }
 
   .msg {
     min-height: 1.2em;
     margin-top: 12px;
     color: #bdbdbd;
-    opacity: 0;                      /* hidden until we show it */
+    opacity: 0;
     transition: opacity .3s ease, color .3s ease;
   }
+
   .msg.show { opacity: 1; }
   .msg.success { color: #f5c473; }
 </style>
@@ -86,6 +105,7 @@
 
     <div class="card">
       <div class="q">PORTAL</div>
+
       <form id="portal" autocomplete="off">
         <input id="phrase" name="phrase" aria-label="phrase" required>
         <button type="submit">bind</button>
@@ -98,7 +118,7 @@
     // ===== knobs =====
     const TOP_LABEL = "13";
     const WINNER_PATH = "/TheWitchingHour/13251521231514/"; // case-sensitive path
-    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";
+    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";         // "areyouafraidofthedark" (normalized)
     document.getElementById('toplabel').textContent = TOP_LABEL;
 
     // ===== logic =====
@@ -114,8 +134,8 @@
       const typed = normalize(input.value);
 
       if (typed === answer) {
-        msg.textContent = "The curse is broken.";
-        msg.classList.add("show","success");
+        msg.textContent = "The circle closes. The curse is broken.";
+        msg.classList.add("show", "success");
         setTimeout(()=>{
           location.href = WINNER_PATH + "?token=ok&v=" + Date.now();
         }, 500);
