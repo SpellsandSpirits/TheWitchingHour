@@ -1,64 +1,99 @@
 <!doctype html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>portal</title>
 <style>
   :root { color-scheme: dark; }
-  body{
-    background:#000;
-    color:#eee;
-    margin:0;
-    display:grid;
-    place-items:center;
-    height:100svh;
-    font:16px/1.5 system-ui,Segoe UI,Roboto,Arial;  
+
+  html, body {
+    margin: 0; height: 100%;
+    background: #0b0b0d; color: #eae9ef;
+    font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   }
-    .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
-    .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:15px; }  .card{
-    max-width:520px;
-    width:92%;
-    padding:28px;
-    border:1px solid #333;
-    border-radius:16px;
-    background:linear-gradient(180deg,#0b0b0b,#111);
-    box-shadow:0 10px 40px rgba(0,0,0,.6);
-    text-align:center;
+
+  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
+  .toplabel {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .18em;
+    color:#9b98a7; opacity:.8; margin-bottom:15px;
   }
-  h1{letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
-  input,button{
+
+  /* Title (styled like your .q) */
+  .q {
+    font-size: clamp(22px, 4.6vw, 34px);
+    font-weight: 700;
+    margin: 8px 0 12px;
+    line-height: 1.2; /* tighter when it wraps */
+  }
+  .q-sub {
+    font-size: clamp(14px, 2vw, 18px);
+    color:#c9c7d4; opacity:.9;
+    margin-top: 6px;
+  }
+
+  /* The card you liked, adjusted for your theme */
+  .card{
+    max-width: 560px;
+    width: 100%;
+    margin: 22px auto 0;
+    padding: 28px;
+    border: 1px solid #3a3847;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #0b0b0d, #121217);
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+    text-align: center;
+  }
+
+  /* Breathing room before the form controls */
+  form { margin: 24px auto 6px; }
+
+  input, button{
     width:100%;
     padding:12px 14px;
     border-radius:10px;
-    border:1px solid #333;
-    background:#0f0f0f;
-    color:#eee;
+    border:1px solid #3a3847;
+    background:#121217;
+    color:#eae9ef;
   }
-  input{margin-top:10px}
-  button{margin-top:12px;cursor:pointer}
-  .msg{min-height:1.2em;margin-top:10px;color:#bdbdbd}
+  input::placeholder{ color:#8a8996; }
+  input{ margin-top:10px; }
+  button{ margin-top:12px; cursor:pointer; background:#2a2834; }
+  button:hover{ background:#343244; }
+
+  .msg{
+    min-height:1.2em; margin-top:10px; color:#bdbdbd;
+    transition: color .3s ease, opacity .3s ease;
+  }
+  .msg.success{ color:#f5c473; }
 </style>
+</head>
 <body>
-<div class="wrap">
-  <div class="toplabel" id="toplabel">01</div></div>
-  <div class="card">
-    <h1>PORTAL</h1>
-    <form id="portal">
-      <input id="phrase" name="phrase" placeholder="Speak the binding words." autocomplete="off" required>
-      <button type="submit">Submit</button>
-      <div id="msg" class="msg"></div>
-    </form>
+  <div class="wrap">
+    <div class="toplabel" id="toplabel">Portal</div>
+
+    <div class="q">The Portal</div>
+    <div class="q-sub">Enter the final phrase to break the witch’s curse.</div>
+
+    <div class="card">
+      <form id="portal" autocomplete="off">
+        <input id="phrase" name="phrase" placeholder="Speak the binding words." required>
+        <button type="submit">submit</button>
+        <div id="msg" class="msg"></div>
+      </form>
+    </div>
   </div>
 
   <script>
-    
+    // ===== knobs =====
     const WINNER_PATH = "/TheWitchingHour/13251521231514/"; // case-sensitive
-  
-    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";
-    // ====================
+    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";   
+    document.getElementById('toplabel').textContent = "Portal";
 
+    // ===== logic =====
     const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-    const answer = atob(ANSW_B64);
+    const answer = atob(ANSW_B64); // normalized target phrase
 
     document.getElementById('portal').addEventListener('submit', (e)=>{
       e.preventDefault();
@@ -67,9 +102,14 @@
       const typed = normalize(typedRaw);
 
       if (typed === answer) {
-        location.href = WINNER_PATH + "?token=ok&v=" + Date.now();
+        msg.textContent = "The circle closes. The curse is broken.";
+        msg.classList.add("success");
+        setTimeout(()=> {
+          location.href = WINNER_PATH + "?token=ok&v=" + Date.now();
+        }, 400);
       } else {
         msg.textContent = "…nothing happens.";
+        msg.classList.remove("success");
       }
     });
   </script>
