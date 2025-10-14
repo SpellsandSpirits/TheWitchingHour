@@ -71,7 +71,10 @@
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-  const ACCEPTED_NORMALIZED = ["thing","thething"];
+  const ENCODED_ANSWERS = ["dGhpbmc=", "dGhldGhpbmc="]; // base64
+
+  function decodeBase64(str){ return atob(str); }
+  const ACCEPTED_NORMALIZED = ENCODED_ANSWERS.map(decodeBase64);
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
   const form = document.getElementById("puzzleForm");
