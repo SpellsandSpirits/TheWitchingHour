@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The Raven</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;   /* fills screen, crops if needed */
+    object-position: center;
+    display: block;
+  }
+
+  /* optional: simple fade-in effect */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  img {
+    animation: fadeIn 2s ease forwards;
+  }
+</style>
+</head>
+<body>
+  <img
