@@ -51,7 +51,7 @@
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">Which opera house does The Phantom haunt?</div>
+  <div class="q">The more you take of me, the more you leave behind. What am I?</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -71,12 +71,10 @@
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-  const ENCODED_ANSWERS = [
-  "cGFyaXM=",
-  "cGFyaXNvcGVyYWhvdXNl",
-  "cGFsYWlzZ2Fybmllcg==",
-  "b3BlcmFnYXJuaWVy",
-  "b3ByYWdhcm5pZXI="
+const ENCODED_ANSWERS = [
+  "Zm9vdHN0ZXBz",
+  "c3RlcHM=",
+  "cGFjZXM="
 ];
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
