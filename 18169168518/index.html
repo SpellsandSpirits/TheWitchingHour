@@ -13,11 +13,7 @@
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   }
   .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
-
-  .toplabel {
-    font-size: 12px; text-transform: uppercase; letter-spacing: .18em;
-    color:#9b98a7; opacity:.8; margin-bottom: 15px;
-  }
+  .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom: 15px; }
 
   .card {
     max-width: 560px; width: 100%;
@@ -27,7 +23,6 @@
     box-shadow: 0 10px 40px rgba(0,0,0,.6);
   }
 
-  /* input + hint */
   .input-wrap { margin: 0 auto 16px; }
   input[type="tel"]{
     background:#121217; border:1px solid #242432; color:#eae9ef;
@@ -36,20 +31,20 @@
   }
   .hint { margin-top: 8px; color:#c9c7d4; opacity:.9; font-size: 13px; letter-spacing:.06em; }
 
-  /* lottie container shows as an “image” before play */
-  .lottie-wrap{
-    margin-top: 18px;
-    display: grid; place-items: center;
-  }
+  .lottie-wrap{ margin-top: 18px; display: grid; place-items: center; }
+  /* Give the container a definite box so you can see *something* even if JSON fails */
   #decoder{
     width: min(92vw, 520px);
-    /* set a height for initial paint; adjust to your comp’s aspect ratio if needed */
-    aspect-ratio: 1 / 1;      /* square dial by default; change if your ring is not square */
+    aspect-ratio: 1 / 1; /* your comp is 1000x1000 → square */
     max-height: 70vh;
+    background: #0f0f15;        /* subtle backdrop so it looks like a panel while paused */
+    border-radius: 12px;
+    border: 1px solid #242432;
   }
 
   .msg { margin-top: 10px; min-height:1.2em; color:#bdbdbd; }
   .msg.success { color:#f5c473; }
+  .status { margin-top: 8px; font-size: 12px; color:#9b98a7; opacity:.9; }
 </style>
 </head>
 <body>
@@ -63,77 +58,97 @@
       </div>
 
       <div class="lottie-wrap">
-        <div id="decoder"></div>
+        <div id="decoder" aria-label="decoder ring animation"></div>
       </div>
 
       <div id="msg" class="msg" aria-live="polite"></div>
+      <div id="status" class="status"></div>
     </div>
   </div>
 
-  <!-- Lottie player -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" integrity="sha512-7Sx8q7pZ0l1Eo6cGOeU7i4rT9h7mJd2zR1Zqv7Eo1UttfC3L5l5B8f6xsy8Y5cI7lmv2QmQqKxw3iJw2dC8X8A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Lottie web (no SRI to avoid block mismatches) -->
+  <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
   <script>
-    // --- knobs ---
+    // ===== knobs =====
     const TARGET_VALUE = '23';
     const START_FRAME = 0;
-    const END_FRAME   = 126;  // inclusive target to hold on
-    const JSON_PATH   = './decoder_ring.json';
+    const END_FRAME   = 126;   // hold here forever
+    const JSON_PATH   = './decoder_ring.json'; // case-sensitive! same folder as this HTML
 
-    const input = document.getElementById('magic');
-    const msg   = document.getElementById('msg');
+    const $ = sel => document.querySelector(sel);
+    const input  = $('#magic');
+    const msg    = $('#msg');
+    const status = $('#status');
 
-    // Load Lottie paused, show frame 0 as a still
-    const anim = lottie.loadAnimation({
-      container: document.getElementById('decoder'),
-      renderer: 'svg',
-      loop: false,
-      autoplay: false,
-      path: JSON_PATH
-    });
+    // Quick preflight: confirm the JSON is reachable (helps catch wrong path / case)
+    fetch(JSON_PATH, { cache: 'no-store' })
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        status.textContent = 'decoder json loaded';
+        return r.json(); // just to validate JSON
+      })
+      .then(() => boot())
+      .catch(err => {
+        status.textContent = 'error loading json: ' + err.message + ' (check path/filename)';
+      });
 
-    // Once JSON loads, ensure we’re parked on frame 0 (or your chosen start)
-    anim.addEventListener('DOMLoaded', () => {
-      try { anim.goToAndStop(START_FRAME, true); } catch(e) {}
-    });
-
-    // When it finishes, freeze on END_FRAME for good measure
-    anim.addEventListener('complete', () => {
-      try { anim.goToAndStop(END_FRAME, true); } catch(e) {}
-      msg.textContent = ''; // keep it clean after success
-    });
-
-    // Helper: normalize digits
-    const digitsOnly = s => (s || '').replace(/\D+/g,'');
-    const lockInput = () => { input.disabled = true; input.blur(); };
-
-    // Trigger on typing (no button)
-    input.addEventListener('input', () => {
-      const val = digitsOnly(input.value);
-      if (val.length > 2) input.value = val.slice(0,2);
-      if (val === TARGET_VALUE) {
-        // Play exactly 0 -> 126 once, then hold on 126
-        try {
-          anim.goToAndStop(START_FRAME, true);
-          anim.playSegments([START_FRAME, END_FRAME], true);
-        } catch(e) {
-          // fallback: just play and hope comp length matches
-          anim.play();
+    function boot(){
+      // Load Lottie paused
+      const anim = lottie.loadAnimation({
+        container: document.getElementById('decoder'),
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        path: JSON_PATH,
+        rendererSettings: {
+          progressiveLoad: true
         }
-        lockInput();
-        msg.textContent = '…the mechanism awakens.';
-        msg.classList.add('success');
-      } else if (val.length === 2) {
-        // wrong 2-digit entry feedback (subtle)
-        msg.textContent = '…nothing happens.';
-        msg.classList.remove('success');
-      } else {
-        msg.textContent = '';
-        msg.classList.remove('success');
-      }
-    });
+      });
 
-    // autofocus after paint
-    setTimeout(() => input && input.focus(), 80);
+      // Helpful event logs (visible on page, not just console)
+      anim.addEventListener('data_failed', () => status.textContent = 'lottie data_failed (invalid JSON?)');
+      anim.addEventListener('config_ready', () => status.textContent = 'lottie config ready');
+      anim.addEventListener('DOMLoaded',   () => {
+        status.textContent = 'lottie dom loaded — parked on frame ' + START_FRAME;
+        try { anim.goToAndStop(START_FRAME, true); } catch(e){}
+      });
+      anim.addEventListener('complete', () => {
+        try { anim.goToAndStop(END_FRAME, true); } catch(e){}
+        msg.textContent = ''; // clean after success
+      });
+
+      // Input behavior
+      const digitsOnly = s => (s || '').replace(/\D+/g,'');
+      const lockInput = () => { input.disabled = true; input.blur(); };
+
+      input.addEventListener('input', () => {
+        const val = digitsOnly(input.value);
+        if (val.length > 2) input.value = val.slice(0,2);
+
+        if (val === TARGET_VALUE) {
+          try {
+            anim.goToAndStop(START_FRAME, true);
+            anim.playSegments([START_FRAME, END_FRAME], true);
+            status.textContent = 'playing 0 → ' + END_FRAME;
+          } catch (e) {
+            status.textContent = 'play error: ' + e.message;
+            anim.play(); // fallback
+          }
+          lockInput();
+          msg.textContent = '…the mechanism awakens.';
+          msg.classList.add('success');
+        } else if (val.length === 2) {
+          msg.textContent = '…nothing happens.';
+          msg.classList.remove('success');
+        } else {
+          msg.textContent = '';
+          msg.classList.remove('success');
+        }
+      });
+
+      // autofocus
+      setTimeout(() => input && input.focus(), 80);
+    }
   </script>
 </body>
 </html>
