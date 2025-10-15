@@ -154,7 +154,7 @@ const spinner = document.getElementById('spinner');
 
 function updatePreview(){
   const formatted = formatListWithAnd(input.value);
-  preview.textContent = formatted ? `Will display as: “${formatted}”` : '';
+  preview.textContent = formatted ? `Your inscription appears as so: “${formatted}”` : '';
 }
 input.addEventListener('input', updatePreview);
 updatePreview();
