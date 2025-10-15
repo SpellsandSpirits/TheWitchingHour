@@ -9,8 +9,7 @@
   *,*::before,*::after { box-sizing: border-box; }
   html, body {
     margin: 0; height: 100%;
-    /* Full-screen background (1080x1920 is perfect) */
-    background: #0b0b0d url("./Beginbkg.png") no-repeat center center fixed;
+    background: #0b0b0d url("./beginbkg.png") no-repeat center center fixed;
     background-size: cover;
     color: #eae9ef;
     font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -47,10 +46,17 @@
   }
 
   .subtitle {
-    margin: 0 0 8px;
+    margin: 0 0 4px;
     font-weight: 700;
     font-size: clamp(16px, 3vw, 20px);
   }
+  .subline {
+    color:#c9c7d4;
+    font-size: clamp(13px, 2vw, 17px);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
   .hint {
     color:#9b98a7; opacity:.95; font-size: 13px; letter-spacing:.04em;
     margin: 0 0 14px;
@@ -94,7 +100,6 @@
   .msg.show { opacity: 1; }
   .msg.error { color:#c25b5b; }
 
-  /* tiny spinner for feedback */
   .msg.success::after{
     content:"";
     display:inline-block;
@@ -114,12 +119,15 @@
     <p class="intro">
       A shadow lingers over this house… A curse cast long ago by the Witch of Little Turtle Hollow.
       Only those clever enough to outsmart her may end it.
+    </p>
+    <p class="intro">
       Will you accept the task of breaking the Witch’s curse?
     </p>
 
     <div class="card">
       <h2 class="subtitle">Form your coven below (up to four names).</h2>
-      <p class="hint">The brave may walk this path alone. Choose a direction — north for courage, south for wit, east for intuition, west for strength.</p>
+      <p class="subline">The brave may walk this path alone.</p>
+      <p class="hint">Choose a direction: north for courage, south for wit, east for intuition, west for strength.</p>
 
       <form id="beginForm" autocomplete="off" novalidate>
         <div class="grid">
@@ -150,10 +158,9 @@
   </div>
 
 <script>
-/* ====== Config ====== */
 const SUBMIT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbymoSk6OlJ5Bk3oFLwejhIlXEEU_eax-Rjpp7BU1UEaHkJAjYEkHVmo7bicgh96Q5Cu/exec';
 const NEXT_PAGE = 'https://spellsandspirits.github.io/TheWitchingHour/';
-const REDIRECT_DELAY_MS = 2500;  // ~2.5 seconds total
+const REDIRECT_DELAY_MS = 2500;
 
 const form = document.getElementById('beginForm');
 const msg  = document.getElementById('msg');
@@ -173,12 +180,11 @@ function payloadFromForm() {
   };
 }
 
-// Fire-and-forget POST as text/plain JSON (no CORS preflight)
 function sendFireAndForget(endpoint, data){
   try {
     fetch(endpoint, {
       method: 'POST',
-      body: JSON.stringify(data), // intentionally no Content-Type header
+      body: JSON.stringify(data),
       keepalive: true,
       mode: 'cors',
       cache: 'no-store'
@@ -196,23 +202,17 @@ form.addEventListener('submit', (e)=>{
     return;
   }
 
-  // Friendly feedback
   msg.textContent = '…the pact is recorded. please wait…';
   msg.classList.remove('error'); msg.classList.add('success','show');
   msg.style.transition = 'opacity 1s ease';
   msg.style.opacity = '1';
 
-  // prevent double-submits
   [...form.elements].forEach(el => el.disabled = true);
 
-  // send without waiting
   sendFireAndForget(SUBMIT_ENDPOINT, data);
 
-  // fade message out ~1s before redirect
   const fadeMs = Math.max(0, REDIRECT_DELAY_MS - 1000);
   setTimeout(()=>{ msg.style.opacity = '0'; }, fadeMs);
-
-  // redirect to main site
   setTimeout(()=>{ window.location.href = NEXT_PAGE; }, REDIRECT_DELAY_MS);
 });
 </script>
