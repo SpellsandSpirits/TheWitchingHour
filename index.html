@@ -1,18 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Halloween Game</title>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Witch’s Curse</title>
 <style>
-  body{margin:0;display:grid;place-items:center;height:100svh;background:#000;color:#eee;font:16px/1.4 system-ui}
-  .card{padding:28px;border:1px solid #333;border-radius:16px;background:#0f0f0f}
-  h1{margin:0 0 8px}
-  p{margin:0}
+  :root { color-scheme: dark; }
+  *,*::before,*::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0b0b0d url("./begin/beginbkg.png") no-repeat center center fixed;
+    background-size: cover;
+    color: #eae9ef;
+    font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 10vh auto;
+    padding: 0 20px;
+    text-align: center;
+  }
+
+  .title {
+    font-size: clamp(28px, 5.6vw, 42px);
+    font-weight: 800;
+    letter-spacing: .02em;
+    margin: 0 0 20px;
+    line-height: 1.2;
+    text-shadow: 0 2px 14px rgba(0,0,0,.35);
+  }
+
+  .card {
+    max-width: 560px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 28px;
+    border: 1px solid #3a3847;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(11,11,13,.90), rgba(18,18,23,.90));
+    backdrop-filter: blur(2px);
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+    text-align: left;
+  }
+
+  .story {
+    font-size: clamp(15px, 2.4vw, 18px);
+    line-height: 1.6;
+    color:#c9c7d4;
+    text-shadow: 0 2px 10px rgba(0,0,0,.35);
+  }
+
+  .story b {
+    color:#eae9ef;
+  }
+
+  .raven {
+    color:#f5c473;
+    text-align:center;
+    font-weight:600;
+    margin-top: 32px;
+    letter-spacing:.03em;
+  }
+
+  .goodluck {
+    margin-top: 48px;
+    text-align: center;
+    font-size: 12px;
+    color: #eae9ef;
+    opacity: 0.8;
+    letter-spacing: .06em;
+  }
+
+  @media (max-width: 430px) {
+    .wrap { margin: 8vh auto; }
+    .card { padding: 24px 18px; }
+  }
 </style>
+</head>
 <body>
-  <div class="card">
-    <h1>Frikkin' Bats. 🦇</h1>
-    <p>Your Halloween game site is online.</p>
+  <div class="wrap">
+    <h1 class="title">The Witch’s Curse</h1>
+
+    <div class="card">
+      <p class="story">
+        Long ago, the Witch of Little Turtle Hollow wove a spell so deep it seeped into the walls, binding this house to her will.
+        <b>But there is hope.</b> Hidden within these rooms lies ancient knowledge—fragments of lost lore left behind by those who once stood against her.
+      </p>
+
+      <p class="story">
+        These remnants hold the counterspells said to weaken her magic.
+        Seek them out. Decipher their meaning. Each counterspell will provide guidance on where the next awaits.
+      </p>
+
+      <p class="story">
+        Only when all is reclaimed may the path become clear. Bind the witch's curse and let the final ritual commence.
+      </p>
+
+      <p class="raven">Before all else, seek the Raven for vital information.</p>
+    </div>
+
+    <div class="goodluck">good luck.</div>
   </div>
 </body>
 </html>
