@@ -6,45 +6,62 @@
 <title>18</title>
 <style>
   :root { color-scheme: dark; }
+
+  /* prevent any horizontal scroll & size math surprises */
+  *,*::before,*::after { box-sizing: border-box; }
+
   html, body {
     margin: 0; height: 100%;
     background: #0b0b0d; color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    overflow-x: hidden; /* kill side scroll */
   }
-  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
-  .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom: 15px; }
+
+  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 16px; text-align: center; }
+
+  .toplabel {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .18em;
+    color:#9b98a7; opacity:.8; margin-bottom: 15px;
+  }
 
   .card {
-    max-width: 560px; width: 100%;
-    margin: 22px auto 0; padding: 28px;
+    max-width: 420px;  /* tighter for phones */
+    width: 100%;
+    margin: 16px auto 0;
+    padding: 20px;     /* tighter padding */
     border: 1px solid #3a3847; border-radius: 16px;
     background: linear-gradient(180deg, #0b0b0d, #121217);
     box-shadow: 0 10px 40px rgba(0,0,0,.6);
   }
 
-  .input-wrap { margin: 0 auto 16px; }
+  /* input + hint */
+  .input-wrap { margin: 0 auto 14px; }
   input[type="tel"]{
     background:#121217; border:1px solid #242432; color:#eae9ef;
-    padding:12px 14px; border-radius:10px; outline:none; width:100%; max-width:220px;
+    padding:12px 14px; border-radius:10px; outline:none;
+    width:100%; max-width:220px;
     text-align:center; font-weight:600; letter-spacing:.08em;
   }
-  .hint { margin-top: 8px; color:#c9c7d4; opacity:.9; font-size: 13px; letter-spacing:.06em; }
+  .hint { margin-top: 6px; color:#c9c7d4; opacity:.9; font-size: 13px; letter-spacing:.06em; }
 
-  .lottie-wrap{ margin-top: 18px; display: grid; place-items: center; }
-  /* Give the container a definite box so you can see *something* even if JSON fails */
+  /* Lottie container: centered, square, no inner frame */
+  .lottie-wrap{
+    margin-top: 12px;
+    display: grid; place-items: center;
+  }
   #decoder{
-    width: min(92vw, 520px);
-    aspect-ratio: 1 / 1; /* your comp is 1000x1000 → square */
-    max-height: 70vh;
-    background: #0f0f15;        /* subtle backdrop so it looks like a panel while paused */
-    border-radius: 12px;
-    border: 1px solid #242432;
+    width: min(90vw, 380px); /* ensure no overflow on small phones */
+    aspect-ratio: 1 / 1;     /* your 1000x1000 comp */
+    max-height: 60vh;        /* keeps it comfortably visible */
+    /* no background or border = no inner frame */
   }
 
-  .msg { margin-top: 10px; min-height:1.2em; color:#bdbdbd; }
+  .msg {
+    margin-top: 10px; min-height:1.2em; color:#bdbdbd;
+    transition: color .3s ease;
+  }
   .msg.success { color:#f5c473; }
-  .status { margin-top: 8px; font-size: 12px; color:#9b98a7; opacity:.9; }
 </style>
 </head>
 <body>
@@ -53,7 +70,8 @@
 
     <div class="card">
       <div class="input-wrap">
-        <input id="magic" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="magic number">
+        <input id="magic" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+               autocomplete="off" aria-label="magic number">
         <div class="hint">enter the magic number</div>
       </div>
 
@@ -62,93 +80,65 @@
       </div>
 
       <div id="msg" class="msg" aria-live="polite"></div>
-      <div id="status" class="status"></div>
     </div>
   </div>
 
-  <!-- Lottie web (no SRI to avoid block mismatches) -->
+  <!-- Lottie web -->
   <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
   <script>
-    // ===== knobs =====
+    // --- knobs ---
     const TARGET_VALUE = '23';
     const START_FRAME = 0;
-    const END_FRAME   = 126;   // hold here forever
-    const JSON_PATH   = './decoder_ring.json'; // case-sensitive! same folder as this HTML
+    const END_FRAME   = 126;   // hold here
+    const JSON_PATH   = './decoder_ring.json';
 
-    const $ = sel => document.querySelector(sel);
-    const input  = $('#magic');
-    const msg    = $('#msg');
-    const status = $('#status');
+    const input = document.getElementById('magic');
+    const msg   = document.getElementById('msg');
 
-    // Quick preflight: confirm the JSON is reachable (helps catch wrong path / case)
-    fetch(JSON_PATH, { cache: 'no-store' })
-      .then(r => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        status.textContent = 'decoder json loaded';
-        return r.json(); // just to validate JSON
-      })
-      .then(() => boot())
-      .catch(err => {
-        status.textContent = 'error loading json: ' + err.message + ' (check path/filename)';
-      });
+    const anim = lottie.loadAnimation({
+      container: document.getElementById('decoder'),
+      renderer: 'svg',
+      loop: false,
+      autoplay: false,
+      path: JSON_PATH,
+      rendererSettings: { progressiveLoad: true }
+    });
 
-    function boot(){
-      // Load Lottie paused
-      const anim = lottie.loadAnimation({
-        container: document.getElementById('decoder'),
-        renderer: 'svg',
-        loop: false,
-        autoplay: false,
-        path: JSON_PATH,
-        rendererSettings: {
-          progressiveLoad: true
-        }
-      });
+    anim.addEventListener('DOMLoaded', () => {
+      try { anim.goToAndStop(START_FRAME, true); } catch(e){}
+    });
 
-      // Helpful event logs (visible on page, not just console)
-      anim.addEventListener('data_failed', () => status.textContent = 'lottie data_failed (invalid JSON?)');
-      anim.addEventListener('config_ready', () => status.textContent = 'lottie config ready');
-      anim.addEventListener('DOMLoaded',   () => {
-        status.textContent = 'lottie dom loaded — parked on frame ' + START_FRAME;
-        try { anim.goToAndStop(START_FRAME, true); } catch(e){}
-      });
-      anim.addEventListener('complete', () => {
-        try { anim.goToAndStop(END_FRAME, true); } catch(e){}
-        msg.textContent = ''; // clean after success
-      });
+    anim.addEventListener('complete', () => {
+      try { anim.goToAndStop(END_FRAME, true); } catch(e){}
+      msg.textContent = '…the ring is aligned.';
+      msg.classList.add('success');
+    });
 
-      // Input behavior
-      const digitsOnly = s => (s || '').replace(/\D+/g,'');
-      const lockInput = () => { input.disabled = true; input.blur(); };
+    const digitsOnly = s => (s || '').replace(/\D+/g,'');
+    const lockInput = () => { input.disabled = true; input.blur(); };
 
-      input.addEventListener('input', () => {
-        const val = digitsOnly(input.value);
-        if (val.length > 2) input.value = val.slice(0,2);
+    input.addEventListener('input', () => {
+      const val = digitsOnly(input.value);
+      if (val.length > 2) input.value = val.slice(0,2);
 
-        if (val === TARGET_VALUE) {
-          try {
-            anim.goToAndStop(START_FRAME, true);
-            anim.playSegments([START_FRAME, END_FRAME], true);
-            status.textContent = 'playing 0 → ' + END_FRAME;
-          } catch (e) {
-            status.textContent = 'play error: ' + e.message;
-            anim.play(); // fallback
-          }
-          lockInput();
-          msg.textContent = '…the mechanism awakens.';
-          msg.classList.add('success');
-        } else if (val.length === 2) {
-          msg.textContent = '…nothing happens.';
-          msg.classList.remove('success');
-        } else {
-          msg.textContent = '';
-          msg.classList.remove('success');
-        }
-      });
+      if (val === TARGET_VALUE) {
+        try {
+          anim.goToAndStop(START_FRAME, true);
+          anim.playSegments([START_FRAME, END_FRAME], true);
+        } catch(e) { anim.play(); }
+        lockInput();
+        msg.textContent = '…the mechanism awakens.';
+        msg.classList.add('success');
+      } else if (val.length === 2) {
+        msg.textContent = '…nothing happens.';
+        msg.classList.remove('success');
+      } else {
+        msg.textContent = '';
+        msg.classList.remove('success');
+      }
+    });
 
-      // autofocus
-      setTimeout(() => input && input.focus(), 80);
-    }
+    setTimeout(() => input && input.focus(), 80);
   </script>
 </body>
 </html>
