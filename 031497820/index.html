@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>03</title>
+<title>02</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -14,24 +14,7 @@
   }
   .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
   .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:15px; }
-
-  /* question + anagram styling */
-  .q {
-    margin: 8px 0 18px;
-  }
-  .q-label {
-    font-size: clamp(22px, 4.6vw, 34px);
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .q-anagram {
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    font-size: clamp(28px, 6vw, 40px);
-    color: #d0ced9;
-    opacity: 0.9;
-  }
-
+  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; line-height: 1.2;}
   form { margin: 48px auto 6px; }
   input[type="text"]{
     background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px; outline:none;
@@ -63,16 +46,12 @@
     transition: opacity 1s ease;
   }
 </style>
-
 </head>
 <body>
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
- <div class="q">
-  <div class="q-label">Unscramble this Anagram:</div>
-  <div class="q-anagram">GTMINARHE</div>
-</div>
+  <div class="q">The more you take of me, the more you leave behind. What am I?</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -87,13 +66,15 @@
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "03";
-  const RUNE_SRC = "./Rune_Ansuz.png";
+  const TOP_LABEL = "02";
+  const RUNE_SRC = "./Rune_Fehu.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
 const ENCODED_ANSWERS = [
-  "bmlnaHRtYXJl"
+  "Zm9vdHN0ZXBz",
+  "c3RlcHM=",
+  "cGFjZXM="
 ];
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
