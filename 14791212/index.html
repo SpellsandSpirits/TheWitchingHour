@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>14</title>
+<title>11</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -51,7 +51,7 @@
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">Which classic monster is also known as “The Creature of the Black Lagoon”?</div>
+  <div class="q">Rearrange the letters of “RACES” to find something you might do on Halloween.</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -66,16 +66,17 @@
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "14";
+  const TOP_LABEL = "11";
   const RUNE_SRC = "./Rune_Hagalaz.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-const ENCODED_ANSWERS = [
-  "Z2lsbG1hbm4=",
-  "Z2lsbG1hbg==",
-  "dGhlZ2lsbG1hbg=="
+  const ENCODED_ANSWERS = [
+  "c2NhcmU="
 ];
+
+  function decodeBase64(str){ return atob(str); }
+  const ACCEPTED_NORMALIZED = ENCODED_ANSWERS.map(decodeBase64);
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
   const form = document.getElementById("puzzleForm");
@@ -95,8 +96,8 @@ const ENCODED_ANSWERS = [
     const candidate = normalize(input.value);
     if(!candidate){ showError("enter an answer."); return; }
 
-  const ok = ENCODED_ANSWERS.includes(btoa(candidate));
-    
+    const ok = ACCEPTED_NORMALIZED.includes(candidate);
+
     if(ok){
       // Message: set text, success color, then fade from 0 -> 1
       msg.textContent = "You have revealed a rune.";
