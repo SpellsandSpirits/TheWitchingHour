@@ -161,7 +161,7 @@
     // When the ring finishes aligning:
     anim.addEventListener('complete', () => {
       try { anim.goToAndStop(END_FRAME, true); } catch(e){}
-      msg.innerHTML = 'Arrange your twenty runes<br>to unveil the binding incantation.';
+      msg.innerHTML = 'Arrange your twenty runes.<br>The binding incantation awaits.';
       msg.classList.add('success');
 
       // reveal the blanks svg
@@ -185,7 +185,7 @@
           anim.playSegments([START_FRAME, END_FRAME], true);
         } catch(e) { anim.play(); }
         lockInput();
-        msg.textContent = '…the mechanism awakens.';
+        msg.textContent = 'the cipher awakens...';
         msg.classList.add('success');
       } else if (val.length === 2) {
         msg.textContent = '…nothing happens.';
