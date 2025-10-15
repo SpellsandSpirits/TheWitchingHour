@@ -92,49 +92,68 @@
 </div>
 
 <script>
-const SUBMIT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbymoSk6OlJ5Bk3oFLwejhIlXEEU_eax-Rjpp7BU1UEaHkJAjYEkHVmo7bicgh96Q5Cu/exec'; // Google Apps Script web-app URL
+const SUBMIT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbymoSk6OlJ5Bk3oFLwejhIlXEEU_eax-Rjpp7BU1UEaHkJAjYEkHVmo7bicgh96Q5Cu/exec';   // keep quotes!
 const NEXT_PAGE = 'https://spellsandspirits.github.io/TheWitchingHour/';
+const DEBUG = true; // set false when happy
 
 const form = document.getElementById('beginForm');
 const msg  = document.getElementById('msg');
 
 function clean(s){ return (s||'').trim(); }
-function payloadFromForm(){
+function payloadFromForm() {
   const north = clean(document.getElementById('north').value);
   const east  = clean(document.getElementById('east').value);
   const south = clean(document.getElementById('south').value);
   const west  = clean(document.getElementById('west').value);
-  const names = [north,east,south,west].filter(Boolean);
+  const names = [north, east, south, west].filter(Boolean);
   return {
-    team:{north,east,south,west,names,size:names.length},
-    meta:{when_iso:new Date().toISOString(),
-          tz:Intl.DateTimeFormat().resolvedOptions().timeZone,
-          ua:navigator.userAgent}
+    team: { north, east, south, west, names, size: names.length },
+    meta: { when_iso: new Date().toISOString(),
+            tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+            ua: navigator.userAgent }
   };
 }
 
-async function sendData(endpoint,data){
+async function sendData(endpoint, data){
   try{
-    const res = await fetch(endpoint,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(data),
-      keepalive:true,
-      mode:'cors'
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      // IMPORTANT: no Content-Type header → stays a simple request (text/plain)
+      body: JSON.stringify(data),
+      keepalive: true,
+      mode: 'cors',
+      cache: 'no-store'
     });
-    console.log('Submit status:',res.status);
-  }catch(e){ console.error(e); }
+    const bodyText = await res.text().catch(()=> '');
+    return { ok: res.ok, status: res.status, body: bodyText };
+  } catch (err) {
+    return { ok:false, status:0, body:String(err) };
+  }
 }
 
-form.addEventListener('submit',async(e)=>{
+form.addEventListener('submit', async (e)=>{
   e.preventDefault();
   const data = payloadFromForm();
-  if(data.team.size===0){ msg.textContent='Add at least one name to form your coven.'; msg.classList.add('show'); return; }
-  msg.textContent='…the pact is recorded.';
+
+  if (data.team.size === 0) {
+    msg.textContent = 'Add at least one name to form your coven.';
+    msg.classList.add('show');
+    return;
+  }
+
+  msg.textContent = '…the pact is recorded.';
   msg.classList.add('show');
-  sendData(SUBMIT_ENDPOINT,data);
-  setTimeout(()=>{ window.location.href = NEXT_PAGE; }, 400);
+
+  const result = await sendData(SUBMIT_ENDPOINT, data);
+  console.log('Apps Script POST result:', result);
+
+  if (DEBUG) {
+    msg.textContent = 'Server response: ' + (result.body || '(no body)');
+  }
+
+  setTimeout(()=>{ window.location.href = NEXT_PAGE; }, DEBUG ? 2000 : 400);
 });
 </script>
+
 </body>
 </html>
