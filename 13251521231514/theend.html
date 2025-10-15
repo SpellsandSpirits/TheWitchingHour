@@ -29,9 +29,16 @@
 
   /* SVG container */
   .mark {
-    max-width: 420px;
-    width: min(92vw, 560px);
+  max-width: 720px;
+  width: min(92vw, 560px);
+}
+
+/* Shrink SVG by 50% on phones */
+@media (max-width: 480px) {
+  .mark img {
+    width: 50%;
   }
+}
 
   /* The handwritten SVG */
   .mark img {
