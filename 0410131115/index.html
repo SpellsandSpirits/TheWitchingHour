@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>04</title>
+<title>03</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -14,15 +14,23 @@
   }
   .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
   .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:15px; }
-  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; line-height: 1.2;}
-  .tri-image {
-  margin-top: 20px;      
-  margin-bottom: 10px;  
-  max-width: min(80vw, 480px);
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
-}
+
+  /* question + anagram styling */
+  .q {
+    margin: 8px 0 18px;
+  }
+  .q-label {
+    font-size: clamp(22px, 4.6vw, 34px);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .q-anagram {
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    font-size: clamp(28px, 6vw, 40px);
+    color: #d0ced9;
+    opacity: 0.9;
+  }
 
   form { margin: 48px auto 6px; }
   input[type="text"]{
@@ -55,13 +63,16 @@
     transition: opacity 1s ease;
   }
 </style>
+
 </head>
 <body>
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">Count the Euclidean triangles in this image.</div>
-  <img src="./triangles.svg" alt="triangle puzzle" class="tri-image" />
+ <div class="q">
+  <div class="q-label">Unscramble this Anagram:</div>
+  <div class="q-anagram">GTMINARHE</div>
+</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -76,18 +87,14 @@
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "04";
-  const RUNE_SRC = "./Rune_Jera.png"; 
+  const TOP_LABEL = "03";
+  const RUNE_SRC = "./Rune_Ansuz.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-  const ENCODED_ANSWERS = [
-  "dGhpcnRlZW4=",
-  "MTM="
+const ENCODED_ANSWERS = [
+  "bmlnaHRtYXJl"
 ];
-
-  function decodeBase64(str){ return atob(str); }
-  const ACCEPTED_NORMALIZED = ENCODED_ANSWERS.map(decodeBase64);
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
   const form = document.getElementById("puzzleForm");
@@ -107,8 +114,8 @@
     const candidate = normalize(input.value);
     if(!candidate){ showError("enter an answer."); return; }
 
-    const ok = ACCEPTED_NORMALIZED.includes(candidate);
-
+  const ok = ENCODED_ANSWERS.includes(btoa(candidate));
+    
     if(ok){
       // Message: set text, success color, then fade from 0 -> 1
       msg.textContent = "You have revealed a rune.";
