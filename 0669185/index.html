@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>06</title>
+<title>05</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -14,7 +14,7 @@
   }
   .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
   .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:15px; }
-  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; line-height: 1.2;}
+  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; line-height: 1.2; }
   form { margin: 48px auto 6px; }
   input[type="text"]{
     background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px; outline:none;
@@ -51,7 +51,7 @@
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">I’m not alive, but I grow. I don’t have lungs, but I need oxygen. What am I?</div>
+  <div class="q">Which opera house does The Phantom haunt?</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -66,14 +66,17 @@
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "06";
-  const RUNE_SRC = "./Rune_Ehwaz.png";
+  const TOP_LABEL = "05";
+  const RUNE_SRC = "./Rune_Raidho.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-const ENCODED_ANSWERS = [
-  "ZmlyZQ==",
-  "ZmxhbWVz"
+  const ENCODED_ANSWERS = [
+  "cGFyaXM=",
+  "cGFyaXNvcGVyYWhvdXNl",
+  "cGFsYWlzZ2Fybmllcg==",
+  "b3BlcmFnYXJuaWVy",
+  "b3ByYWdhcm5pZXI="
 ];
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
