@@ -7,7 +7,6 @@
 <style>
   :root { color-scheme: dark; }
   *,*::before,*::after { box-sizing: border-box; }
-
   html, body {
     margin: 0; height: 100%;
     background: #0b0b0d; color: #eae9ef;
@@ -15,29 +14,17 @@
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
     overflow-x: hidden;
   }
-
-  /* overall placement moved up */
-  .wrap { 
-    max-width: 720px; 
-    margin: 6vh auto 0;  /* shifted upward */
-    padding: 0 16px; 
-    text-align: center; 
-  }
-
+  .wrap { max-width: 720px; margin: 4vh auto 0; padding: 0 16px; text-align: center; }
   .toplabel {
     font-size: 12px; text-transform: uppercase; letter-spacing: .18em;
     color:#9b98a7; opacity:.8; margin-bottom: 15px;
   }
-
   .card {
-    max-width: 420px; width: 100%;
-    margin: 0 auto;
-    padding: 20px;
+    max-width: 420px; width: 100%; margin: 0 auto; padding: 20px;
     border: 1px solid #3a3847; border-radius: 16px;
     background: linear-gradient(180deg, #0b0b0d, #121217);
     box-shadow: 0 10px 40px rgba(0,0,0,.6);
   }
-
   .input-wrap { margin: 0 auto 14px; }
   input[type="tel"]{
     background:#121217; border:1px solid #242432; color:#eae9ef;
@@ -46,127 +33,64 @@
     text-align:center; font-weight:600; letter-spacing:.08em;
   }
   .hint { margin-top: 6px; color:#c9c7d4; opacity:.9; font-size: 13px; letter-spacing:.06em; }
-
   .lottie-wrap{ margin-top: 12px; display: grid; place-items: center; }
-  #decoder{
-    width: min(90vw, 380px);
-    aspect-ratio: 1 / 1;
-    max-height: 60vh;
-  }
-
+  #decoder{ width: min(90vw, 380px); aspect-ratio: 1 / 1; max-height: 60vh; }
   .msg {
-    margin-top: 8px;          /* moved closer to wheel */
-    margin-bottom: 16px;      /* space before SVG */
-    color:#bdbdbd;
-    transition: color .3s ease, opacity .3s ease;
-    line-height: 1.4;
+    margin-top: 8px; margin-bottom: 20px; color:#bdbdbd;
+    transition: color .3s ease, opacity .3s ease; line-height: 1.4;
   }
   .msg.success { color:#f5c473; }
-
   .reveal {
-    opacity: 0;
-    transform: translateY(8px);
+    opacity: 0; transform: translateY(8px);
     transition: opacity .8s ease, transform .8s ease;
     pointer-events: none;
   }
-  .reveal.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
+  .reveal.show { opacity: 1; transform: translateY(0); }
   .svg-frame { display: grid; place-items: center; }
-  .svg-frame img,
-  .svg-frame object,
-  .svg-frame svg {
-    width: min(90vw, 380px);
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
+  .svg-frame img { width: min(90vw, 380px); max-width: 100%; height: auto; display: block; }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="toplabel">18</div>
-
-    <div class="card">
-      <div class="input-wrap">
-        <input id="magic" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="2"
-               autocomplete="off" aria-label="magic number">
-        <div class="hint">enter the magic number</div>
-      </div>
-
-      <div class="lottie-wrap">
-        <div id="decoder" aria-label="decoder ring animation"></div>
-      </div>
-
-      <div id="msg" class="msg" aria-live="polite"></div>
-
-      <div id="reveal" class="reveal" aria-hidden="true">
-        <div class="svg-frame">
-          <img id="phraseSvg" src="./phrase_blanks.svg" alt="Binding phrase blanks">
-        </div>
+<div class="wrap">
+  <div class="toplabel">18</div>
+  <div class="card">
+    <div class="input-wrap">
+      <input id="magic" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off">
+      <div class="hint">enter the magic number</div>
+    </div>
+    <div class="lottie-wrap"><div id="decoder"></div></div>
+    <div id="msg" class="msg" aria-live="polite"></div>
+    <div id="reveal" class="reveal" aria-hidden="true">
+      <div class="svg-frame">
+        <img src="./phrase_blanks.svg" alt="Binding phrase blanks">
       </div>
     </div>
   </div>
-
-  <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
-  <script>
-    const TARGET_VALUE = '23';
-    const START_FRAME = 0;
-    const END_FRAME   = 126;
-    const JSON_PATH   = './decoder_ring.json';
-
-    const input  = document.getElementById('magic');
-    const msg    = document.getElementById('msg');
-    const reveal = document.getElementById('reveal');
-
-    const anim = lottie.loadAnimation({
-      container: document.getElementById('decoder'),
-      renderer: 'svg',
-      loop: false,
-      autoplay: false,
-      path: JSON_PATH,
-      rendererSettings: { progressiveLoad: true }
-    });
-
-    anim.addEventListener('DOMLoaded', () => {
-      try { anim.goToAndStop(START_FRAME, true); } catch(e){}
-    });
-
-    anim.addEventListener('complete', () => {
-      try { anim.goToAndStop(END_FRAME, true); } catch(e){}
-      msg.innerHTML = 'Arrange your twenty runes.<br>The binding phrase awaits.';
-      msg.classList.add('success');
-      reveal.classList.add('show');
-      reveal.setAttribute('aria-hidden','false');
-    });
-
-    const digitsOnly = s => (s || '').replace(/\D+/g,'');
-    const lockInput = () => { input.disabled = true; input.blur(); };
-
-    input.addEventListener('input', () => {
-      const val = digitsOnly(input.value);
-      if (val.length > 2) input.value = val.slice(0,2);
-
-      if (val === TARGET_VALUE) {
-        try {
-          anim.goToAndStop(START_FRAME, true);
-          anim.playSegments([START_FRAME, END_FRAME], true);
-        } catch(e) { anim.play(); }
-        lockInput();
-        msg.textContent = '…the mechanism awakens.';
-        msg.classList.add('success');
-      } else if (val.length === 2) {
-        msg.textContent = '…nothing happens.';
-        msg.classList.remove('success');
-      } else {
-        msg.textContent = '';
-        msg.classList.remove('success');
-      }
-    });
-
-    setTimeout(() => input && input.focus(), 80);
-  </script>
+</div>
+<script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+<script>
+const TARGET_VALUE = '23', START_FRAME = 0, END_FRAME = 126;
+const input = document.getElementById('magic'), msg = document.getElementById('msg'), reveal = document.getElementById('reveal');
+const anim = lottie.loadAnimation({container:document.getElementById('decoder'),renderer:'svg',loop:false,autoplay:false,path:'./decoder_ring.json'});
+anim.addEventListener('DOMLoaded',()=>{anim.goToAndStop(START_FRAME,true);});
+anim.addEventListener('complete',()=>{
+  anim.goToAndStop(END_FRAME,true);
+  msg.innerHTML = 'Arrange your twenty runes.<br>The binding phrase awaits.';
+  msg.classList.add('success');
+  reveal.classList.add('show'); reveal.setAttribute('aria-hidden','false');
+});
+const digitsOnly = s => (s||'').replace(/\D+/g,'');
+const lockInput = ()=>{input.disabled=true; input.blur();};
+input.addEventListener('input',()=>{
+  const val = digitsOnly(input.value);
+  if(val.length>2) input.value = val.slice(0,2);
+  if(val===TARGET_VALUE){
+    anim.goToAndStop(START_FRAME,true); anim.playSegments([START_FRAME,END_FRAME],true);
+    lockInput(); msg.textContent = '…the mechanism awakens.'; msg.classList.add('success');
+  } else if(val.length===2){ msg.textContent='…nothing happens.'; msg.classList.remove('success'); }
+  else { msg.textContent=''; msg.classList.remove('success'); }
+});
+setTimeout(()=>input&&input.focus(),80);
+</script>
 </body>
 </html>
