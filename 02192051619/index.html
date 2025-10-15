@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>02</title>
+<title>01</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -51,7 +51,7 @@
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">The more you take of me, the more you leave behind. What am I?</div>
+  <div class="q">In the Addams Family, what is the name of the disembodied hand?</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -66,16 +66,15 @@
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "02";
-  const RUNE_SRC = "./Rune_Fehu.png";
+  const TOP_LABEL = "01";
+  const RUNE_SRC = "./Rune_Othala.png";  // place PNG in this folder
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-const ENCODED_ANSWERS = [
-  "Zm9vdHN0ZXBz",
-  "c3RlcHM=",
-  "cGFjZXM="
-];
+  const ENCODED_ANSWERS = ["dGhpbmc=", "dGhldGhpbmc="]; // base64
+
+  function decodeBase64(str){ return atob(str); }
+  const ACCEPTED_NORMALIZED = ENCODED_ANSWERS.map(decodeBase64);
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
   const form = document.getElementById("puzzleForm");
@@ -95,8 +94,8 @@ const ENCODED_ANSWERS = [
     const candidate = normalize(input.value);
     if(!candidate){ showError("enter an answer."); return; }
 
-  const ok = ENCODED_ANSWERS.includes(btoa(candidate));
-    
+    const ok = ACCEPTED_NORMALIZED.includes(candidate);
+
     if(ok){
       // Message: set text, success color, then fade from 0 -> 1
       msg.textContent = "You have revealed a rune.";
