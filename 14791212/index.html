@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>11</title>
+<title>12</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -51,7 +51,7 @@
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">Rearrange the letters of “RACES” to find something you might do on Halloween.</div>
+  <div class="q">What baked treat is said to attract spirits if left on a windowsill during Samhain?</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -66,17 +66,18 @@
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "11";
-  const RUNE_SRC = "./Rune_Hagalaz.png";
+  const TOP_LABEL = "12";
+  const RUNE_SRC = "./Rune_Raidho.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-  const ENCODED_ANSWERS = [
-  "c2NhcmU="
+const ENCODED_ANSWERS = [
+  "Y2FrZQ==",
+  "Y2FrZXM=",
+  "c291bGNha2U=",
+  "c291bGNha2Vz",
+  "c291bG1hc3NjYWtl"
 ];
-
-  function decodeBase64(str){ return atob(str); }
-  const ACCEPTED_NORMALIZED = ENCODED_ANSWERS.map(decodeBase64);
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
   const form = document.getElementById("puzzleForm");
@@ -96,8 +97,8 @@
     const candidate = normalize(input.value);
     if(!candidate){ showError("enter an answer."); return; }
 
-    const ok = ACCEPTED_NORMALIZED.includes(candidate);
-
+  const ok = ENCODED_ANSWERS.includes(btoa(candidate));
+    
     if(ok){
       // Message: set text, success color, then fade from 0 -> 1
       msg.textContent = "You have revealed a rune.";
