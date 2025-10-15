@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>09</title>
+<title>08</title>
+<!-- (Optional) Preload so it appears instantly on success -->
+<link rel="preload" as="image" href="./Rune_Ansuz.png">
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -14,8 +16,28 @@
   }
   .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
   .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:15px; }
-  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; line-height: 1.2;}
-  form { margin: 48px auto 6px; }
+
+  /* question + hint styling */
+  .q { margin: 8px 0 18px; }
+  .q-label {
+    font-size: clamp(22px, 4.6vw, 34px);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .q-hints {
+    font-size: clamp(14px, 2vw, 18px);
+    font-weight: 400;
+    letter-spacing: normal;
+    color: #c9c7d4;
+    line-height: 1.6;
+    text-align: left;
+    display: inline-block;
+    margin-top: 8px;
+  }
+
+  /* breathing room before form */
+  form { margin: 48px auto 6px; } /* adjust margin-top as desired */
+
   input[type="text"]{
     background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px; outline:none;
     width:100%; max-width:360px;
@@ -38,9 +60,12 @@
   }
   .msg.success { color:#f5c473; }    /* gold/amber on success */
 
+  /* ensure truly hidden until we reveal */
+  [hidden] { display: none !important; }
+
   /* rune fades in too */
   .sigil{
-    display:none; opacity:0;
+    opacity:0;
     margin:6px auto 0; max-width:min(80vw,520px);
     filter: drop-shadow(0 0 20px rgba(255, 0, 80, .25));
     transition: opacity 1s ease;
@@ -49,9 +74,14 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="toplabel" id="toplabel">01</div>
+  <div class="toplabel" id="toplabel">16</div>
 
-  <div class="q">Popularized by Bram Stoker's Dracula, what does a vampire traditionally fear the most?</div>
+  <div class="q">
+    <div class="q-label">Potion or Poison?</div>
+    <div class="q-hints">
+     The potion you need to break the curse glows under blacklight. What color is?
+    </div>
+  </div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -60,20 +90,22 @@
 
   <div class="result">
     <div class="msg" id="message"></div>
-    <img id="sigil" class="sigil" alt="sigil unlocked" />
+    <!-- Start hidden; we’ll unhide only after the image loads -->
+    <img id="sigil" class="sigil" alt="sigil unlocked" hidden />
   </div>
 </div>
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "09";
-  const RUNE_SRC = "./Rune_Raidho.png";
+  const TOP_LABEL = "08";
+  const RUNE_SRC = "./Rune_Kauno.png"; // ensure exact filename & path
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
-const ENCODED_ANSWERS = [
-  "Z2FybGlj"
+  const ENCODED_ANSWERS = [
+  "Ymx1ZQ=="
 ];
+
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
   const form = document.getElementById("puzzleForm");
@@ -93,8 +125,8 @@ const ENCODED_ANSWERS = [
     const candidate = normalize(input.value);
     if(!candidate){ showError("enter an answer."); return; }
 
-  const ok = ENCODED_ANSWERS.includes(btoa(candidate));
-    
+    const ok = ENCODED_ANSWERS.includes(btoa(candidate));
+
     if(ok){
       // Message: set text, success color, then fade from 0 -> 1
       msg.textContent = "You have revealed a rune.";
@@ -102,11 +134,21 @@ const ENCODED_ANSWERS = [
       msg.style.opacity = 0;
       requestAnimationFrame(()=>{ msg.style.opacity = 1; }); // 1s fade
 
-      // Rune: show and fade in
-      sigil.src = RUNE_SRC;
-      sigil.style.display = "block";
+      // Prepare image reveal:
       sigil.style.opacity = 0;
-      requestAnimationFrame(()=>{ sigil.style.opacity = 1; }); // 1s fade
+
+      // Set handlers *before* setting src
+      sigil.onload = () => {
+        sigil.removeAttribute('hidden');      // now that it's loaded, unhide
+        // keep display block (img default) and fade it in
+        requestAnimationFrame(()=>{ sigil.style.opacity = 1; });
+      };
+      sigil.onerror = () => {
+        showError("rune image missing (check filename/path).");
+      };
+
+      // Trigger load
+      sigil.src = RUNE_SRC;
 
       input.disabled = true;
     } else {
