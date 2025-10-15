@@ -1,1 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Begin</title>
+<style>
+  :root { color-scheme: dark; }
+  *,*::before,*::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: #0b0b0d; color: #eae9ef;
+    font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  }
+  .wrap { max-width: 720px; margin: 8vh auto; padding: 0 20px; text-align: center; }
+
+  .title {
+    font-size: clamp(26px, 5.6vw, 42px);
+    font-weight: 800;
+    letter-spacing: .02em;
+    margin: 0 0 12px;
+    line-height: 1.15;
+  }
+  .intro {
+    font-size: clamp(14px, 2.3vw, 18px);
+    color:#c9c7d4;
+    line-height: 1.6;
+    margin: 0 auto 18px;
+    max-width: 46ch;
+  }
+
+  .card {
+    max-width: 520px; width: 100%;
+    margin: 24px auto 0; padding: 24px;
+    border: 1px solid #3a3847; border-radius: 16px;
+    background: linear-gradient(180deg, #0b0b0d, #121217);
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+    text-align: center;
+  }
+
+  .subtitle {
+    margin: 0 0 8px;
+    font-weight: 700;
+    font-size: clamp(16px, 3vw, 20px);
+  }
+  .hint {
+    color:#9b98a7; opacity:.95; font-size: 13px; letter-spacing:.04em;
+    margin: 0 0 14px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 12px 0 6px;
+  }
+  @media (max-width: 430px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  label {
+    display:block; text-align:left; font-size:12px; letter-spacing:.12em;
+    text-transform: uppercase; color:#9b98a7; margin: 0 0 6px;
+  }
+  .field {
+    text-align:left;
+  }
+  input[type="text"]{
+    background:#121217; border:1px solid #242432; color:#eae9ef;
+    padding:12px 14px; border-radius:10px; outline:none; width:100%;
+  }
+  input::placeholder{ color:#8a8996; }
+
+  .actions { margin-top: 18px; }
+  button{
+    background:#2a2834; border:1px solid #3a3847; color:#eae9ef;
+    padding:12px 16px; border-radius:10px; cursor:pointer; width:100%;
+    max-width:260px; font-weight:700; letter-spacing:.06em;
+  }
+  button:hover{ background:#343244; }
+
+  .msg { margin-top: 10px; min-height:1.2em; color:#bdbdbd; font-size:14px; }
+  .msg.success { color:#f5c473; }
+  .msg.error { color:#c25b5b; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="title">The Witching Hour</h1>
+    <p class="intro">
+      A shadow lingers over this house… A curse cast long ago by the Witch of Little Turtle Hollow.
+      Only those clever enough to outsmart her may end it.
+      Will you accept the task of breaking the Witch’s curse?
+    </p>
+
+    <div class="card">
+      <h2 class="subtitle">Form your coven below (up to four names).</h2>
+      <p class="hint">The brave may walk this path alone. Choose a direction — north for courage, south for wit, east for intuition, west for strength.</p>
+
+      <form id="beginForm" autocomplete="off" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="north">North</label>
+            <input id="north" name="north" type="text" placeholder="Name (optional)" />
+          </div>
+          <div class="field">
+            <label for="east">East</label>
+            <input id="east" name="east" type="text" placeholder="Name (optional)" />
+          </div>
+          <div class="field">
+            <label for="south">South</label>
+            <input id="south" name="south" type="text" placeholder="Name (optional)" />
+          </div>
+          <div class="field">
+            <label for="west">West</label>
+            <input id="west" name="west" type="text" placeholder="Name (optional)" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Accept the Task</button>
+        </div>
+        <div id="msg" class="msg" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+<script>
+/* ===================== Reporting setup =====================
+   You’re hosting on GitHub Pages (static), so use a serverless endpoint.
+   Pick one and paste its URL in SUBMIT_ENDPOINT:
+
+   • Formspree (easy; emails + dashboard): https://formspree.io/f/XXXX
+   • Google Sheets via Apps Script (free; logs to a sheet)
+   • Zapier/Make webhook (fan-out to email both of you, SMS, etc.)
+
+   This script will:
+   - package the team + timestamp,
+   - POST JSON with sendBeacon (preferred) or fetch({keepalive:true}),
+   - then navigate to story.html immediately.
+============================================================= */
+
+const SUBMIT_ENDPOINT = https://script.google.com/macros/s/AKfycby1vH0OjvzNVlEeF35z2peryO1uZDKLfgk1Gn21Ty92S7BXn4fGroPeXU41J2mZ7zCA/exec;  // <-- paste your endpoint URL
+const NEXT_PAGE = './story.html';                  // page to navigate after submit
+
+const form = document.getElementById('beginForm');
+const msg  = document.getElementById('msg');
+
+function clean(s){ return (s||'').trim(); }
+
+function payloadFromForm() {
+  const north = clean(document.getElementById('north').value);
+  const east  = clean(document.getElementById('east').value);
+  const south = clean(document.getElementById('south').value);
+  const west  = clean(document.getElementById('west').value);
+
+  // allow 1-4 names, but require at least 1
+  const names = [north, east, south, west].filter(Boolean);
+  return {
+    team: { north, east, south, west, names, size: names.length },
+    meta: {
+      when_iso: new Date().toISOString(),
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+      ua: navigator.userAgent,
+    }
+  };
+}
+
+function sendData(endpoint, data){
+  if (!endpoint || endpoint === 'YOUR_ENDPOINT_URL_HERE') return Promise.resolve(false);
+
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+
+  // Try beacon first (fires reliably during navigation)
+  if (navigator.sendBeacon) {
+    const ok = navigator.sendBeacon(endpoint, blob);
+    return Promise.resolve(ok);
+  }
+
+  // Fallback to fetch with keepalive
+  return fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+    keepalive: true,
+    mode: 'cors',
+  }).then(r => r.ok).catch(()=>false);
+}
+
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+
+  const data = payloadFromForm();
+  if (data.team.size === 0) {
+    msg.textContent = 'Add at least one name to form your coven.';
+    msg.classList.remove('success');
+    msg.classList.add('error');
+    return;
+  }
+
+  msg.textContent = '…the pact is recorded.';
+  msg.classList.remove('error');
+  msg.classList.add('success');
+
+  // fire-and-go: attempt to send, then navigate either way
+  try { await sendData(SUBMIT_ENDPOINT, data); } catch(_) {}
+  // tiny delay helps some mobile browsers flush UI before nav
+  setTimeout(()=>{ window.location.href = NEXT_PAGE; }, 150);
+});
+</script>
+</body>
+</html>
 
