@@ -61,14 +61,9 @@
   }
   input::placeholder{ color:#8a8996; }
 
-  .hint {
-    color:#9b98a7; opacity:.95; font-size: 12px; letter-spacing:.04em;
-    margin: 8px 0 16px;
-  }
-
   .preview {
     font-size: 13px; color:#c9c7d4; opacity:.95;
-    margin: 4px auto 8px; max-width: 48ch;
+    margin: 6px auto 10px; max-width: 48ch;
   }
   .preview b { color:#eae9ef; }
 
@@ -77,16 +72,36 @@
     background:#2a2834; border:1px solid #3a3847; color:#eae9ef;
     padding:12px 16px; border-radius:10px; cursor:pointer; width:100%;
     max-width:280px; font-weight:700; letter-spacing:.02em;
-    text-transform: none; /* keep your exact casing */
+    text-transform: none;
   }
   button:hover{ background:#343244; }
 
+  /* Message + spinner container (stable layout) */
   .msg {
-    margin-top: 12px; min-height:1.2em; font-size:14px;
-    color:#f5c473; opacity:0; transition: opacity .8s ease;
+    margin-top: 16px;
+    min-height: 64px;          /* reserve space so nothing jumps */
   }
-  .msg.show { opacity: 1; }
-  .msg.error { color:#c25b5b; }
+  .status-text {
+    color:#f5c473;
+    font-size: 15px;
+    opacity: 0;
+    transition: opacity .8s ease;
+  }
+  .status-text.show { opacity: 1; }
+
+  .spinner {
+    margin: 10px auto 0;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid #f5c473;
+    border-right-color: transparent;
+    animation: spin .9s linear infinite;
+    opacity: 0;                 /* appears with text */
+    transition: opacity .8s ease;
+  }
+  .spinner.show { opacity: 1; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -102,73 +117,80 @@
 
       <form id="ritualForm" autocomplete="off" novalidate>
         <input id="names" name="names" type="text" placeholder="Enter names here, separated by commas" />
-        <div class="hint">Example: Eleni, Amie, Vanessa</div>
-
         <div id="preview" class="preview" aria-live="polite"></div>
 
         <div class="actions">
           <button type="submit">Conjure the Ritual Now</button>
         </div>
-        <div id="msg" class="msg" aria-live="polite"></div>
+
+        <!-- status area -->
+        <div class="msg" aria-live="polite">
+          <div id="statusText" class="status-text"></div>
+          <div id="spinner" class="spinner" role="progressbar" aria-hidden="true"></div>
+        </div>
+
       </form>
     </div>
   </div>
 
 <script>
-/* Mechanics can be wired later; for now this just does light UX and (optionally) navigation. */
-
-// Format a comma-separated list into “…, …, and …”
+/* ====== Live preview (“and” formatting) ====== */
 function formatListWithAnd(raw){
   const parts = (raw || '')
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);
-
   if (parts.length === 0) return '';
   if (parts.length === 1) return parts[0];
   if (parts.length === 2) return parts[0] + ' and ' + parts[1];
-
-  // Oxford comma for 3+
   return parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
 }
 
 const form = document.getElementById('ritualForm');
 const input = document.getElementById('names');
 const preview = document.getElementById('preview');
-const msg = document.getElementById('msg');
+const statusText = document.getElementById('statusText');
+const spinner = document.getElementById('spinner');
 
-// Live preview so players see how names appear on the TV
 function updatePreview(){
   const formatted = formatListWithAnd(input.value);
-  preview.textContent = formatted
-    ? `Will display as: “${formatted}”`
-    : '';
+  preview.textContent = formatted ? `Will display as: “${formatted}”` : '';
 }
 input.addEventListener('input', updatePreview);
 updatePreview();
 
+/* ====== Submit flow with two-stage messaging ====== */
 form.addEventListener('submit', (e)=>{
   e.preventDefault();
 
   const formatted = formatListWithAnd(input.value);
   if (!formatted) {
-    msg.textContent = 'Add at least one name.';
-    msg.classList.remove('show');
-    msg.classList.add('error','show');
+    statusText.textContent = 'Add at least one name.';
+    statusText.classList.add('show');
     return;
   }
 
-  // Show the “charging up” line for drama; wire triggers later
-  msg.textContent = '…the ritual circle stirs.';
-  msg.classList.remove('error');
-  msg.classList.add('show');
-
-  // TODO: Here’s where we’ll call your backend / Home Assistant / OBS trigger.
-  // For now, we just hold the message. Leave this as a clean anchor point:
-  // triggerRitual(formatted);
-
-  // Optionally: disable inputs to prevent double-cast
+  // Lock inputs to prevent double fire
   [...form.elements].forEach(el => el.disabled = true);
+
+  // Stage 1 — show first line + spinner
+  statusText.textContent = '…something mysterious is happening…';
+  statusText.classList.add('show');
+  spinner.classList.add('show');
+
+  // After 5s: fade out text, swap to stage 2
+  setTimeout(()=>{
+    statusText.classList.remove('show');
+    setTimeout(()=>{
+      statusText.textContent = '…the ritual is working…';
+      statusText.classList.add('show');
+    }, 800); // match .8s fade
+  }, 5000);
+
+  // After another 5s → navigate to the end page
+  setTimeout(()=>{
+    window.location.href = './theend.html';
+  }, 10000);
 });
 </script>
 </body>
