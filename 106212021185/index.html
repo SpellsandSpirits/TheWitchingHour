@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>10</title>
+<title>09</title>
 <style>
   :root { color-scheme: dark; }
   html, body {
@@ -51,7 +51,7 @@
 <div class="wrap">
   <div class="toplabel" id="toplabel">01</div>
 
-  <div class="q">Always in front of you, but never seen. What am I?</div>
+  <div class="q">Popularized by Bram Stoker's Dracula, what does a vampire traditionally fear the most?</div>
 
   <form id="puzzleForm" autocomplete="off">
     <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
@@ -66,14 +66,13 @@
 
 <script>
   // --- per-page knobs ---
-  const TOP_LABEL = "10";
-  const RUNE_SRC = "./Rune_Ansuz.png";
+  const TOP_LABEL = "09";
+  const RUNE_SRC = "./Rune_Raidho.png";
   document.getElementById("toplabel").textContent = TOP_LABEL;
 
   // Accept these (case/space/punct-insensitive)
 const ENCODED_ANSWERS = [
-  "ZnV0dXJl",
-  "dGhlZnV0dXJl"
+  "Z2FybGlj"
 ];
   const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 
