@@ -3,138 +3,56 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>18 · Decoder Ring</title>
+  <title>18</title>
   <meta name="color-scheme" content="dark light" />
   <style>
-    :root {
-      --bg: #0f0f13;
-      --fg: #eaeaea;
-      --muted: #9aa0a6;
-      --accent: #6e84ff;
-      --card: #17171c;
-      --border: #2b2b33;
+    /* keep it super minimal to match your other pages */
+    :root { --bg:#0f0f13; --fg:#eaeaea; --border:#333; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
+    .page{max-width:560px;margin:20px auto;padding:0 16px;text-align:center}
+    .badge{font-weight:700; letter-spacing:.5px; opacity:.9; font-size:16px; margin:0 0 8px 0;}
+    .prompt{margin:8px 0 6px 0; font-size:15px; opacity:.85;}
+    #magicInput{
+      width:200px; font-size:18px; text-align:center; padding:10px 12px;
+      border-radius:10px; border:1px solid var(--border); background:#17171c; color:var(--fg);
+      outline:none; margin:0 auto 12px auto; display:block;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-      line-height: 1.45;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      min-height: 100svh;
-      padding: 24px clamp(16px, 4vw, 32px);
-    }
-    /* top number badge */
-    .badge {
-      width: 40px; height: 40px;
-      border-radius: 999px;
-      display: grid; place-items: center;
-      margin: 0 auto 10px;
-      background: linear-gradient(180deg, #222532, #151822);
-      border: 1px solid var(--border);
-      color: var(--fg);
-      font-weight: 700;
-      letter-spacing: .5px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
-      user-select: none;
-    }
-    .wrap {
-      max-width: 560px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    #cipherContainer {
-      width: 92vw;
-      max-width: 520px;
-      aspect-ratio: 1 / 1;
-      margin: 14px auto 8px;
-      background: radial-gradient(120% 120% at 50% 0%, rgba(110,132,255,.15) 0%, transparent 60%),
-                  radial-gradient(120% 120% at 50% 100%, rgba(110,132,255,.08) 0%, transparent 60%);
-      border-radius: 16px;
-      outline: 1px solid rgba(255,255,255,.03);
-    }
-    /* ensure the embedded SVG fills container cleanly */
-    #cipherContainer svg { width: 100%; height: 100%; display: block; }
-
-    #magicInput {
-      width: 180px;
-      font-size: 20px;
-      text-align: center;
-      padding: 11px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--fg);
-      outline: none;
-      margin: 10px auto 0;
-      transition: border-color .2s ease, box-shadow .2s ease;
-    }
-    #magicInput:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(110,132,255,.18);
-    }
-    .hint {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: .95rem;
-    }
-    .shake { animation: shake .28s ease; }
-    @keyframes shake {
-      0%,100%{ transform: translateX(0) }
-      25%{ transform: translateX(-6px) }
-      50%{ transform: translateX(6px) }
-      75%{ transform: translateX(-3px) }
-    }
-    noscript {
-      display: block;
-      margin: 16px auto;
-      padding: 12px 14px;
-      max-width: 520px;
-      background: #3a1d1d;
-      border: 1px solid #6a2a2a;
-      color: #fff2f2;
-      border-radius: 10px;
-      text-align: center;
-    }
+    #cipherContainer{ width:92vw; max-width:520px; aspect-ratio:1/1; margin:0 auto; }
+    #cipherContainer svg{ width:100%; height:100%; display:block; background:transparent; }
+    .shake{ animation:shake .28s ease; }
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+    noscript{display:block;margin:12px auto;max-width:520px;padding:10px;border:1px solid #6a2a2a;background:#3a1d1d;color:#fff2f2;border-radius:8px}
   </style>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 </head>
 <body>
-  <div class="badge" aria-hidden="true">18</div>
+  <div class="page">
+    <!-- little number at the very top (plain, like your other pages) -->
+    <div class="badge">18</div>
 
-  <main class="wrap" role="main">
+    <!-- input ABOVE the animation -->
+    <div class="prompt">Enter the magic number.</div>
+    <input id="magicInput" inputmode="numeric" pattern="[0-9]*" placeholder="Enter number…"
+           autocomplete="one-time-code" aria-label="Enter the magic number">
+
+    <!-- Lottie container (transparent, no gradients) -->
     <div id="cipherContainer" aria-label="Decoder ring animation"></div>
 
-    <input id="magicInput"
-           inputmode="numeric"
-           pattern="[0-9]*"
-           autocomplete="one-time-code"
-           placeholder="Enter number…"
-           aria-label="Enter the magic number" />
-
-    <div class="hint">Type the number. No submit button needed.</div>
-
     <noscript>This page requires JavaScript to reveal the cipher.</noscript>
-  </main>
+  </div>
 
   <script>
-    // Ensure script runs after lottie is loaded
-    (function init() {
+    (function(){
       const container = document.getElementById('cipherContainer');
       const input = document.getElementById('magicInput');
 
-      // Load Bodymovin JSON
       const anim = lottie.loadAnimation({
         container,
         renderer: 'svg',
         loop: false,
         autoplay: false,
-        path: 'decoder_ring.json' // ← keep this filename next to this HTML
+        path: 'decoder_ring.json' // keep this file next to this HTML
       });
 
       // Show first (misaligned) frame as soon as data is ready
@@ -144,38 +62,36 @@
       let unlocked = false;
       const LAST_FRAME = 126; // your final aligned frame
 
-      function triggerUnlock() {
+      function triggerUnlock(){
         if (unlocked) return;
         unlocked = true;
         input.value = '23';
         input.disabled = true;
         input.blur();
 
-        // Play only 0 → LAST_FRAME. Then hard-park on LAST_FRAME forever.
         anim.playSegments([0, LAST_FRAME], true);
         const onComplete = () => {
-          anim.goToAndStop(LAST_FRAME, true);
+          anim.goToAndStop(LAST_FRAME, true); // hold forever on final frame
           anim.removeEventListener('complete', onComplete);
-          // OPTIONAL: reveal next clue or redirect
-          // setTimeout(() => location.href = 'next.html', 800);
+          // optional next step: redirect or reveal
+          // setTimeout(()=>location.href='next.html', 800);
         };
         anim.addEventListener('complete', onComplete);
       }
 
-      // Validate as they type (no submit button)
+      // As-you-type (no submit button)
       input.addEventListener('input', () => {
-        input.value = input.value.replace(/\D+/g, ''); // digits only
+        input.value = input.value.replace(/\D+/g,''); // digits only
         if (input.value === '23') {
           triggerUnlock();
         } else if (input.value.length >= 2 && !unlocked) {
-          // tiny feedback if they entered 2 digits but it's wrong
           input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
         }
       });
 
-      // Autofocus on load (mobile-safe)
+      // Optional: autofocus
       window.addEventListener('load', () => {
-        setTimeout(() => { if (!unlocked) input.focus({ preventScroll: true }); }, 50);
+        setTimeout(()=>{ if (!unlocked) input.focus({preventScroll:true}); }, 50);
       });
     })();
   </script>
