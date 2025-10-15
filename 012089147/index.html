@@ -2,120 +2,97 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>01</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The Raven</title>
 <style>
   :root { color-scheme: dark; }
+
+  /* Prevent scrolling and bounce entirely */
   html, body {
-    margin: 0; height: 100%;
-    background: #0b0b0d; color: #eae9ef;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    background: #000;
+    color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    overflow: hidden;       /* no scroll */
+    touch-action: none;     /* no touch-drag bounce */
   }
-  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 20px; text-align: center; }
-  .toplabel { font-size: 12px; text-transform: uppercase; letter-spacing: .18em; color:#9b98a7; opacity:.8; margin-bottom:15px; }
-  .q { font-size: clamp(22px, 4.6vw, 34px); font-weight: 700; margin: 8px 0 18px; line-height: 1.2;}
-  form { margin: 48px auto 6px; }
-  input[type="text"]{
-    background:#121217; border:1px solid #242432; color:#eae9ef; padding:12px 14px; border-radius:10px; outline:none;
-    width:100%; max-width:360px;
-  }
-  input::placeholder{ color:#8a8996; }
-  button{
-    background:#2a2834; border:1px solid #3a3847; color:#eae9ef; padding:10px 14px; border-radius:10px; cursor:pointer;
-    text-transform:lowercase; margin-top:10px; width:100%; max-width:360px;
-  }
-  button:hover{ background:#343244; }
 
-  .result { margin-top: 32px; }
-
-  /* message: start hidden, fade via inline opacity changes */
-  .msg{
-    font-size:14px; margin-bottom:8px;
-    color:#c25b5b;                   /* default = error red */
-    opacity: 0;                      /* start hidden */
-    transition: opacity 1s ease, color .3s ease;
+  /* Full viewport stage, pinned */
+  .stage {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
   }
-  .msg.success { color:#f5c473; }    /* gold/amber on success */
 
-  /* rune fades in too */
-  .sigil{
-    display:none; opacity:0;
-    margin:6px auto 0; max-width:min(80vw,520px);
-    filter: drop-shadow(0 0 20px rgba(255, 0, 80, .25));
-    transition: opacity 1s ease;
+  /* Fullscreen raven background */
+  .raven {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    animation: fadeIn 2.5s ease forwards;
+    z-index: 1;
+  }
+
+  /* Text overlay */
+  .message {
+    position: absolute;
+    bottom: 16vh;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  /* Shimmering text */
+  .line {
+    font-size: clamp(16px, 3vw, 20px);
+    letter-spacing: .05em;
+    opacity: 0;
+    background: linear-gradient(90deg, #8a8a8a, #ffffff, #8a8a8a);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation:
+      fadeIn 2s ease forwards,
+      shimmer 6s linear infinite;
+  }
+
+  /* Timing */
+  .line.first  { animation-delay: 1s, 1s; }   /* fades with image */
+  .line.second { animation-delay: 2.2s, 2.2s; } /* 1.2s later */
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Moonlight shimmer effect */
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="toplabel" id="toplabel">01</div>
-
-  <div class="q">In the Addams Family, what is the name of the disembodied hand?</div>
-
-  <form id="puzzleForm" autocomplete="off">
-    <input id="answerInput" type="text" placeholder="Whisper the counterspell." aria-label="answer" />
-    <button type="submit">submit</button>
-  </form>
-
-  <div class="result">
-    <div class="msg" id="message"></div>
-    <img id="sigil" class="sigil" alt="sigil unlocked" />
+  <div class="stage">
+    <img src="./raven.png" alt="A raven under the moon" class="raven" />
+    <div class="message">
+      <div class="line first">Lest you forget...</div>
+      <div class="line second">May the moon guide your path.</div>
+    </div>
   </div>
-</div>
-
-<script>
-  // --- per-page knobs ---
-  const TOP_LABEL = "01";
-  const RUNE_SRC = "./Rune_Othala.png";  // place PNG in this folder
-  document.getElementById("toplabel").textContent = TOP_LABEL;
-
-  // Accept these (case/space/punct-insensitive)
-  const ENCODED_ANSWERS = ["dGhpbmc=", "dGhldGhpbmc="]; // base64
-
-  function decodeBase64(str){ return atob(str); }
-  const ACCEPTED_NORMALIZED = ENCODED_ANSWERS.map(decodeBase64);
-  const normalize = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
-
-  const form = document.getElementById("puzzleForm");
-  const input = document.getElementById("answerInput");
-  const msg   = document.getElementById("message");
-  const sigil = document.getElementById("sigil");
-
-  function showError(text){
-    msg.textContent = text;
-    msg.classList.remove("success");
-    // show immediately (no fade)
-    msg.style.opacity = 1;
-  }
-
-  form.addEventListener("submit",(e)=>{
-    e.preventDefault();
-    const candidate = normalize(input.value);
-    if(!candidate){ showError("enter an answer."); return; }
-
-    const ok = ACCEPTED_NORMALIZED.includes(candidate);
-
-    if(ok){
-      // Message: set text, success color, then fade from 0 -> 1
-      msg.textContent = "You have revealed a rune.";
-      msg.classList.add("success");
-      msg.style.opacity = 0;
-      requestAnimationFrame(()=>{ msg.style.opacity = 1; }); // 1s fade
-
-      // Rune: show and fade in
-      sigil.src = RUNE_SRC;
-      sigil.style.display = "block";
-      sigil.style.opacity = 0;
-      requestAnimationFrame(()=>{ sigil.style.opacity = 1; }); // 1s fade
-
-      input.disabled = true;
-    } else {
-      showError("try again.");
-    }
-  });
-
-  setTimeout(()=> input && input.focus(), 50);
-</script>
 </body>
 </html>
