@@ -16,7 +16,6 @@
     overflow-x: hidden;
   }
 
-  /* overall placement */
   .wrap { max-width: 720px; margin: 4vh auto 0; padding: 0 16px; text-align: center; }
 
   .toplabel {
@@ -25,13 +24,12 @@
   }
 
   .card {
-    max-width: 420px; width: 100%; margin: 0 auto; padding: 20px 20px 36px;
+    max-width: 420px; width: 100%; margin: 0 auto; padding: 20px, 20px, 36px;
     border: 1px solid #3a3847; border-radius: 16px;
     background: linear-gradient(180deg, #0b0b0d, #121217);
     box-shadow: 0 10px 40px rgba(0,0,0,.6);
   }
 
-  /* input + hint */
   .input-wrap { margin: 0 auto 14px; }
   input[type="tel"]{
     background:#121217; border:1px solid #242432; color:#eae9ef;
@@ -41,12 +39,11 @@
   }
   .hint { margin-top: 6px; color:#c9c7d4; opacity:.9; font-size: 13px; letter-spacing:.06em; }
 
-  /* Lottie area */
   .lottie-wrap{ margin-top: 12px; display: grid; place-items: center; }
 
   /* Center the wheel perfectly and crop any uneven export padding */
   #decoder{
-    width: min(90vw, 380px);
+    width: min(84vw, 340px);
     aspect-ratio: 1 / 1;
     max-height: 60vh;
 
@@ -56,16 +53,17 @@
     justify-content: center;
     overflow: hidden;             /* clip stray transparent edges */
 
-    /* optional micro-adjust if AE export bounds were asymmetrical */
-    --nudge-x: -8px;               /* try small values like -3px / +3px */
+    /* adjustable micro-nudge (tweak these) */
+    --nudge-x: 0px;               /* e.g., -6px, +4px */
     --nudge-y: 0px;
   }
-  /* Center and allow micro-nudge of the actual SVG Lottie injects */
-  #decoder svg{
+
+  /* Try via CSS first… */
+  #decoder > svg{
     display: block;
     width: 100%;
     height: 100%;
-    transform: translate(var(--nudge-x), var(--nudge-y));
+    transform: translate(var(--nudge-x), var(--nudge-y)); /* may be ignored on iOS */
   }
 
   /* message under the wheel */
@@ -94,7 +92,7 @@
   .svg-frame img,
   .svg-frame object,
   .svg-frame svg {
-    width: min(84vw, 340px);
+    width: min(84vw, 340px);   /* slightly smaller so it doesn't kiss the edges */
     max-width: 100%;
     height: auto;
     display: block;
@@ -136,31 +134,52 @@
     const END_FRAME   = 126;                // park here
     const JSON_PATH   = './decoder_ring.json';
 
-    const input  = document.getElementById('magic');
-    const msg    = document.getElementById('msg');
-    const reveal = document.getElementById('reveal');
-    const decoderEl = document.getElementById('decoder');
+    const input   = document.getElementById('magic');
+    const msg     = document.getElementById('msg');
+    const reveal  = document.getElementById('reveal');
+    const decoder = document.getElementById('decoder');
 
     // Load Lottie paused
     const anim = lottie.loadAnimation({
-      container: decoderEl,
+      container: decoder,
       renderer: 'svg',
       loop: false,
       autoplay: false,
       path: JSON_PATH,
       rendererSettings: {
         progressiveLoad: true,
-        preserveAspectRatio: 'xMidYMid meet'  // critical for true centering
+        preserveAspectRatio: 'xMidYMid meet'  // ensure true centering
       }
     });
 
+    // Apply a robust nudge directly to the injected <svg> (fixes iOS Safari)
+    function applyNudge() {
+      const svg = anim && anim.renderer && anim.renderer.svgElement;
+      if (!svg) return;
+      // read CSS variables from #decoder
+      const cs = getComputedStyle(decoder);
+      const nx = cs.getPropertyValue('--nudge-x').trim() || '0px';
+      const ny = cs.getPropertyValue('--nudge-y').trim() || '0px';
+
+      // set transform inline on the real SVG
+      svg.style.transform = `translate(${nx}, ${ny})`;
+      svg.style.transformBox = 'fill-box';
+      svg.style.transformOrigin = 'center center';
+
+      // belt & suspenders: ensure the SVG honors center scaling
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    }
+
     anim.addEventListener('DOMLoaded', () => {
       try { anim.goToAndStop(START_FRAME, true); } catch(e){}
+      applyNudge();
     });
 
-    // When the ring finishes aligning:
+    // Re-apply after playback (some renderers tweak styles)
     anim.addEventListener('complete', () => {
       try { anim.goToAndStop(END_FRAME, true); } catch(e){}
+      applyNudge();
+
       msg.innerHTML = 'Arrange your twenty runes.<br>The binding incantation awaits.';
       msg.classList.add('success');
 
@@ -168,6 +187,10 @@
       reveal.classList.add('show');
       reveal.setAttribute('aria-hidden','false');
     });
+
+    // Re-apply on resize/orientation change (iOS can re-layout)
+    window.addEventListener('resize', applyNudge);
+    window.addEventListener('orientationchange', () => setTimeout(applyNudge, 200));
 
     // helpers
     const digitsOnly = s => (s || '').replace(/\D+/g,'');
@@ -179,13 +202,12 @@
       if (val.length > 2) input.value = val.slice(0,2);
 
       if (val === TARGET_VALUE) {
-        // start the show
         try {
           anim.goToAndStop(START_FRAME, true);
           anim.playSegments([START_FRAME, END_FRAME], true);
         } catch(e) { anim.play(); }
         lockInput();
-        msg.textContent = 'the cipher awakens...';
+        msg.textContent = 'The cipher awakens...';
         msg.classList.add('success');
       } else if (val.length === 2) {
         msg.textContent = '…nothing happens.';
