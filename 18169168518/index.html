@@ -6,8 +6,6 @@
 <title>18</title>
 <style>
   :root { color-scheme: dark; }
-
-  /* prevent any horizontal scroll & size math surprises */
   *,*::before,*::after { box-sizing: border-box; }
 
   html, body {
@@ -15,10 +13,16 @@
     background: #0b0b0d; color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-    overflow-x: hidden; /* kill side scroll */
+    overflow-x: hidden;
   }
 
-  .wrap { max-width: 720px; margin: 10vh auto; padding: 0 16px; text-align: center; }
+  /* overall placement moved up */
+  .wrap { 
+    max-width: 720px; 
+    margin: 6vh auto 0;  /* shifted upward */
+    padding: 0 16px; 
+    text-align: center; 
+  }
 
   .toplabel {
     font-size: 12px; text-transform: uppercase; letter-spacing: .18em;
@@ -26,16 +30,14 @@
   }
 
   .card {
-    max-width: 420px;  /* tighter for phones */
-    width: 100%;
-    margin: 16px auto 0;
-    padding: 20px;     /* tighter padding */
+    max-width: 420px; width: 100%;
+    margin: 0 auto;
+    padding: 20px;
     border: 1px solid #3a3847; border-radius: 16px;
     background: linear-gradient(180deg, #0b0b0d, #121217);
     box-shadow: 0 10px 40px rgba(0,0,0,.6);
   }
 
-  /* input + hint */
   .input-wrap { margin: 0 auto 14px; }
   input[type="tel"]{
     background:#121217; border:1px solid #242432; color:#eae9ef;
@@ -45,23 +47,42 @@
   }
   .hint { margin-top: 6px; color:#c9c7d4; opacity:.9; font-size: 13px; letter-spacing:.06em; }
 
-  /* Lottie container: centered, square, no inner frame */
-  .lottie-wrap{
-    margin-top: 12px;
-    display: grid; place-items: center;
-  }
+  .lottie-wrap{ margin-top: 12px; display: grid; place-items: center; }
   #decoder{
-    width: min(90vw, 380px); /* ensure no overflow on small phones */
-    aspect-ratio: 1 / 1;     /* your 1000x1000 comp */
-    max-height: 60vh;        /* keeps it comfortably visible */
-    /* no background or border = no inner frame */
+    width: min(90vw, 380px);
+    aspect-ratio: 1 / 1;
+    max-height: 60vh;
   }
 
   .msg {
-    margin-top: 10px; min-height:1.2em; color:#bdbdbd;
-    transition: color .3s ease;
+    margin-top: 8px;          /* moved closer to wheel */
+    margin-bottom: 16px;      /* space before SVG */
+    color:#bdbdbd;
+    transition: color .3s ease, opacity .3s ease;
+    line-height: 1.4;
   }
   .msg.success { color:#f5c473; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .8s ease, transform .8s ease;
+    pointer-events: none;
+  }
+  .reveal.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .svg-frame { display: grid; place-items: center; }
+  .svg-frame img,
+  .svg-frame object,
+  .svg-frame svg {
+    width: min(90vw, 380px);
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
 </style>
 </head>
 <body>
@@ -80,20 +101,25 @@
       </div>
 
       <div id="msg" class="msg" aria-live="polite"></div>
+
+      <div id="reveal" class="reveal" aria-hidden="true">
+        <div class="svg-frame">
+          <img id="phraseSvg" src="./phrase_blanks.svg" alt="Binding phrase blanks">
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Lottie web -->
   <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
   <script>
-    // --- knobs ---
     const TARGET_VALUE = '23';
     const START_FRAME = 0;
-    const END_FRAME   = 126;   // hold here
+    const END_FRAME   = 126;
     const JSON_PATH   = './decoder_ring.json';
 
-    const input = document.getElementById('magic');
-    const msg   = document.getElementById('msg');
+    const input  = document.getElementById('magic');
+    const msg    = document.getElementById('msg');
+    const reveal = document.getElementById('reveal');
 
     const anim = lottie.loadAnimation({
       container: document.getElementById('decoder'),
@@ -110,8 +136,10 @@
 
     anim.addEventListener('complete', () => {
       try { anim.goToAndStop(END_FRAME, true); } catch(e){}
-      msg.textContent = '…the ring is aligned.';
+      msg.innerHTML = 'Arrange your twenty runes.<br>The binding phrase awaits.';
       msg.classList.add('success');
+      reveal.classList.add('show');
+      reveal.setAttribute('aria-hidden','false');
     });
 
     const digitsOnly = s => (s || '').replace(/\D+/g,'');
