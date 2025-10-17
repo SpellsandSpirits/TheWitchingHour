@@ -22,13 +22,13 @@
   }
 
   .card {
-    width: min(92svw, 520px);       /* fits small viewports; avoids horizontal scroll */
+    width: min(92svw, 520px);
     max-width: 520px;
     background: #141418;
     border: 1px solid #26262b;
     border-radius: 16px;
     padding: 22px;
-    margin-inline: auto;            /* ensure centered on odd browsers */
+    margin-inline: auto;
     box-shadow: 0 8px 28px rgba(0,0,0,.35);
     text-align: center;
   }
@@ -58,7 +58,6 @@
     color: #eaeaea;
   }
 
-  /* Reduce card width slightly on very narrow phones */
   @media (max-width: 360px) {
     .card { width: min(94svw, 520px); padding: 18px; }
   }
@@ -75,20 +74,52 @@
 
 <script>
 (function () {
-  // Read from query string if provided, else fallback to your date/time.
-  // Example set by your gate snippet: ?until=2025-10-17T20:00:00-06:00
+  // Accepts ?until= as either milliseconds since epoch OR an ISO string.
+  // Example (from your gate script): ?until=2025-10-17T20:00:00-06:00  OR  ?until=1760762400000
   const params = new URLSearchParams(location.search);
-  const untilISO = params.get("until") || "2025-10-17T20:00:00-06:00";
-  const start = new Date(untilISO).getTime();
+  const raw = params.get("until") || "2025-10-17T20:00:00-06:00";
 
+  function parseStart(v) {
+    const n = Number(v);
+    if (Number.isFinite(n) && n > 0) return n;      // numeric ms timestamp
+    let t = Date.parse(v);
+    if (!Number.isFinite(t)) {
+      // Safari fallback: remove colon in timezone, e.g. -06:00 -> -0600
+      t = Date.parse(String(v).replace(/([+-]\d{2}):?(\d{2})$/, "$1$2"));
+    }
+    return t;
+  }
+
+  const start = parseStart(raw);
   const el = document.getElementById("count");
 
-  function tick() {
-    const now = Date.now();
-    const diff = Math.max(0, start - now);
+  function render(diffMs) {
+    const s = Math.max(0, Math.floor(diffMs / 1000));
+    const dd = Math.floor(s / 86400);
+    const hh = Math.floor((s % 86400) / 3600);
+    const mm = Math.floor((s % 3600) / 60);
+    const ss = s % 60;
+    el.textContent = dd > 0
+      ? `${dd}d ${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`
+      : `${String(hh + dd*24).padStart(2,"0")}:${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`;
+  }
 
+  function tick() {
+    if (!Number.isFinite(start)) { el.textContent = "00:00:00"; return; }
+    const now = Date.now();
+    const diff = start - now;
     if (diff <= 0) {
       el.textContent = "00:00:00";
-      // Optional: auto-return to previous page or begin page on unlock:
-      // history.length > 1 ? history.back() :
-      //   location.replace("https://spellsandspirits.github.io/TheWitchingHour/begin/");
+      // Optional: auto-redirect on unlock:
+      // location.replace("https://spellsandspirits.github.io/TheWitchingHour/begin/");
+      return;
+    }
+    render(diff);
+    requestAnimationFrame(tick);
+  }
+
+  tick();
+})();
+</script>
+</body>
+</html>
