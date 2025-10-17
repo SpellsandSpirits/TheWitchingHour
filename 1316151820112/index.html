@@ -141,7 +141,7 @@
       const typed = normalize(input.value);
 
       if (typed === answer) {
-        msg.textContent = "The circle closes. The curse is broken.";
+        msg.textContent = "!!!";
         msg.classList.add("show", "success");
         setTimeout(()=>{
           location.href = WINNER_PATH + "?token=ok&v=" + Date.now();
