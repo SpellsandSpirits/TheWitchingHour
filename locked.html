@@ -2,22 +2,71 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>No.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Doors are sealed</title>
 <style>
+  /* Reset & mobile safety */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  html, body { margin: 0; overflow-x: hidden; }
   :root { color-scheme: dark; }
-  body { margin:0; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; display:grid; min-height:100dvh; place-items:center; background:#0b0b0d; color:#eaeaea; }
-  .card { max-width: 520px; width: min(92vw, 520px); background:#141418; border:1px solid #26262b; border-radius:16px; padding:24px; box-shadow:0 8px 28px rgba(0,0,0,.35); text-align:center; }
-  h1 { margin:0 0 8px; font-size:1.25rem; }
-  .time { font-variant-numeric: tabular-nums; font-size:2rem; letter-spacing:.03em; margin:.35rem 0 1rem; }
-  .sub { opacity:.8; }
-  .btn { display:inline-block; margin-top:12px; border:1px solid #2c2c33; padding:10px 14px; border-radius:10px; text-decoration:none; color:#eaeaea; }
+
+  body {
+    display: grid;
+    min-height: 100dvh;
+    place-items: center;
+    background: #0b0b0d;
+    color: #eaeaea;
+    font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
+  }
+
+  .card {
+    width: min(92svw, 520px);       /* fits small viewports; avoids horizontal scroll */
+    max-width: 520px;
+    background: #141418;
+    border: 1px solid #26262b;
+    border-radius: 16px;
+    padding: 22px;
+    margin-inline: auto;            /* ensure centered on odd browsers */
+    box-shadow: 0 8px 28px rgba(0,0,0,.35);
+    text-align: center;
+  }
+
+  h1 {
+    margin: 2px 0 8px;
+    font-size: clamp(1.1rem, 2.8vw, 1.35rem);
+    letter-spacing: 0.2px;
+  }
+
+  .time {
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    letter-spacing: .03em;
+    margin: .25rem 0 .75rem;
+  }
+
+  .sub { opacity: .82; font-size: .95rem; }
+
+  .btn {
+    display: inline-block;
+    margin-top: 10px;
+    border: 1px solid #2c2c33;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #eaeaea;
+  }
+
+  /* Reduce card width slightly on very narrow phones */
+  @media (max-width: 360px) {
+    .card { width: min(94svw, 520px); padding: 18px; }
+  }
 </style>
 </head>
 <body>
   <div class="card">
-    <h1>The Portal is Sealed. 🔒</h1>
-    <div id="when" class="sub"></div>
+    <h1>The Portal is Locked. 🔒</h1>
     <div class="time" id="count">--:--:--</div>
     <div class="sub">Test your fate at <strong>8:00 PM</strong>.</div>
     <a class="btn" href="https://spellsandspirits.github.io/TheWitchingHour/begin/">register</a>
@@ -26,36 +75,20 @@
 
 <script>
 (function () {
+  // Read from query string if provided, else fallback to your date/time.
+  // Example set by your gate snippet: ?until=2025-10-17T20:00:00-06:00
   const params = new URLSearchParams(location.search);
   const untilISO = params.get("until") || "2025-10-17T20:00:00-06:00";
   const start = new Date(untilISO).getTime();
 
-  // Show the absolute target in Denver time (handles DST correctly for display)
-  const fmt = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Denver",
-    dateStyle: "full",
-    timeStyle: "short"
-  });
-  document.getElementById("when").textContent = "Unlocks: " + fmt.format(new Date(start));
-
   const el = document.getElementById("count");
+
   function tick() {
     const now = Date.now();
     const diff = Math.max(0, start - now);
+
     if (diff <= 0) {
-      // Unlock immediately when time hits
-      history.length > 1 ? history.back() : location.replace("/");
-      return;
-    }
-    const s = Math.floor(diff / 1000);
-    const hh = String(Math.floor(s / 3600)).padStart(2, "0");
-    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-    const ss = String(s % 60).padStart(2, "0");
-    el.textContent = `${hh}:${mm}:${ss}`;
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-</script>
-</body>
-</html>
+      el.textContent = "00:00:00";
+      // Optional: auto-return to previous page or begin page on unlock:
+      // history.length > 1 ? history.back() :
+      //   location.replace("https://spellsandspirits.github.io/TheWitchingHour/begin/");
