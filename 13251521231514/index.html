@@ -117,12 +117,7 @@
 
 <script>
 /* ---------- CONFIG ---------- */
-/* Set your HTTPS webhook when you start your Cloudflare/Nabu Casa tunnel: */
 const WEBHOOK_URL = "https://still-prep-jokes-communist.trycloudflare.com/api/webhook/witch_winner";
-
-/* Optional local testing (same network, no HTTPS):
-   add ?local=1 to the page URL and it will post to your LAN HA instead. */
-const LOCAL_HA_URL = "http://10.0.0.90:8123/api/webhook/witch_winner";
 /* ---------------------------- */
 
 function formatListWithAnd(raw){
@@ -149,21 +144,14 @@ function updatePreview(){
 input.addEventListener('input', updatePreview);
 updatePreview();
 
-function pickWebhook() {
-  const params = new URLSearchParams(location.search);
-  if (params.get('local') === '1') return LOCAL_HA_URL;
-  return WEBHOOK_URL;
-}
-
+/* CORS-safe webhook post (works from GitHub Pages → HA via Cloudflare) */
 async function sendToHA(formatted) {
-  const url = pickWebhook();
-  const res = await fetch(url, {
+  await fetch(WEBHOOK_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    // We send a single string so it renders on one line in your overlay
-    body: JSON.stringify({ names: formatted })
+    mode: "no-cors",                                // avoid CORS preflight
+    headers: { "Content-Type": "text/plain;charset=UTF-8" }, // CORS-simple type
+    body: JSON.stringify({ names: formatted })      // HA reads JSON body
   });
-  if (!res.ok) throw new Error(`HA webhook error: ${res.status}`);
 }
 
 form.addEventListener('submit', async (e)=>{
@@ -185,10 +173,8 @@ form.addEventListener('submit', async (e)=>{
   spinner.classList.add('show');
 
   try {
-    // Fire the webhook to HA (this triggers your whole finale)
     await sendToHA(formatted);
   } catch (err) {
-    // If this fails, show message and unlock form
     spinner.classList.remove('show');
     statusText.textContent = 'Could not reach the ritual altar. Check the tunnel URL.';
     console.error(err);
