@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+(() => {
+  const START_ISO = "2025-10-17T20:00:00-06:00"; // Denver 8:00 PM
+  const startTime = new Date(START_ISO).getTime(); // numeric ms
+  if (Date.now() < startTime) {
+    const parts = location.pathname.split('/').filter(Boolean);
+    const basePath = parts.length ? `/${parts[0]}/` : '/';
+    const url = new URL(`${basePath}locked.html`, location.origin);
+    url.searchParams.set("until", String(startTime));
+    location.replace(url.toString());
+  }
+})();
+</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>05</title>
