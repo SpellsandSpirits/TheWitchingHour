@@ -7,6 +7,9 @@
 <style>
   :root { color-scheme: dark; }
 
+  /* Make padding/border count toward widths */
+  *, *::before, *::after { box-sizing: border-box; }
+
   html, body {
     margin: 0;
     height: 100%;
@@ -14,6 +17,7 @@
     color: #eae9ef;
     font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    overflow-x: hidden; /* avoid tiny horizontal shifts on iOS */
   }
 
   .wrap {
@@ -23,26 +27,31 @@
     text-align: center;
   }
 
- .toplabel {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .18em;
-  color: #9b98a7;
-  opacity: .8;
-  margin-bottom: 15px;
+  /* NEW: shared centering column for label + card */
+  .column {
+    max-width: 560px;     /* same visual width as the card */
+    margin: 0 auto;       /* dead-center axis */
+  }
 
-  /* Center with respect to the card below */
-  display: block;
-  max-width: 560px;      /* match the card width exactly */
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
+  .toplabel {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    color: #9b98a7;
+    opacity: .8;
+    margin-bottom: 15px;
+    text-align: center;
+
+    /* helps numerals look optically centered on iOS */
+    font-variant-numeric: tabular-nums;
+    -webkit-font-feature-settings: 'tnum' 1;
+    font-feature-settings: 'tnum' 1;
+  }
 
   .card {
     max-width: 560px;
     width: 100%;
-    margin: 60px auto 0;
+    margin: 60px 0 0;     /* top spacing preserved; centered by .column */
     padding: 40px;
     border: 1px solid #3a3847;
     border-radius: 16px;
@@ -76,7 +85,6 @@
     background: #121217;
     color: #eae9ef;
     text-align: center;
-    box-sizing: border-box;
   }
 
   button {
@@ -89,7 +97,6 @@
     color: #eae9ef;
     text-transform: lowercase;
     cursor: pointer;
-    box-sizing: border-box;
   }
 
   button:hover { background: #343244; }
@@ -104,20 +111,30 @@
 
   .msg.show { opacity: 1; }
   .msg.success { color: #f5c473; }
+
+  /* Keep content centered within iPhone safe areas */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(env(safe-area-inset-left), 0px);
+      padding-right: max(env(safe-area-inset-right), 0px);
+    }
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="toplabel" id="toplabel">13</div>
+    <div class="column">
+      <div class="toplabel" id="toplabel">13</div>
 
-    <div class="card">
-      <div class="q">PORTAL</div>
+      <div class="card">
+        <div class="q">PORTAL</div>
 
-      <form id="portal" autocomplete="off">
-        <input id="phrase" name="phrase" aria-label="phrase" required>
-        <button type="submit">bind</button>
-        <div id="msg" class="msg" aria-live="polite"></div>
-      </form>
+        <form id="portal" autocomplete="off">
+          <input id="phrase" name="phrase" aria-label="phrase" required>
+          <button type="submit">bind</button>
+          <div id="msg" class="msg" aria-live="polite"></div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -125,7 +142,7 @@
     // ===== knobs =====
     const TOP_LABEL = "13";
     const WINNER_PATH = "/TheWitchingHour/13251521231514/"; // case-sensitive path
-    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";         // "areyouafraidofthedark" (normalized)
+    const ANSW_B64 = "YXJleW91YWZyYWlkb2Z0aGVkYXJr";
     document.getElementById('toplabel').textContent = TOP_LABEL;
 
     // ===== logic =====
@@ -141,7 +158,7 @@
       const typed = normalize(input.value);
 
       if (typed === answer) {
-        msg.textContent = "!!!";
+        msg.textContent = "The circle closes. The curse is broken.";
         msg.classList.add("show", "success");
         setTimeout(()=>{
           location.href = WINNER_PATH + "?token=ok&v=" + Date.now();
