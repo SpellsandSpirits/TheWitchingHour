@@ -76,31 +76,15 @@
   }
   button:hover{ background:#343244; }
 
-  /* Message + spinner container (stable layout) */
-  .msg {
-    margin-top: 16px;
-    min-height: 64px;          /* reserve space so nothing jumps */
-  }
-  .status-text {
-    color:#f5c473;
-    font-size: 15px;
-    opacity: 0;
-    transition: opacity .8s ease;
-  }
+  .msg { margin-top: 16px; min-height: 64px; }
+  .status-text { color:#f5c473; font-size: 15px; opacity: 0; transition: opacity .8s ease; }
   .status-text.show { opacity: 1; }
-
   .spinner {
-    margin: 10px auto 0;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    border: 2px solid #f5c473;
-    border-right-color: transparent;
-    animation: spin .9s linear infinite;
-    opacity: 0;                 /* appears with text */
-    transition: opacity .8s ease;
+    margin: 10px auto 0; width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid #f5c473; border-right-color: transparent;
+    animation: spin .9s linear infinite; opacity: 0; transition: opacity .8s ease;
   }
   .spinner.show { opacity: 1; }
-
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -123,18 +107,24 @@
           <button type="submit">conjure the ritual now</button>
         </div>
 
-        <!-- status area -->
         <div class="msg" aria-live="polite">
           <div id="statusText" class="status-text"></div>
           <div id="spinner" class="spinner" role="progressbar" aria-hidden="true"></div>
         </div>
-
       </form>
     </div>
   </div>
 
 <script>
-/* ====== Live preview (“and” formatting) ====== */
+/* ---------- CONFIG ---------- */
+/* Set your HTTPS webhook when you start your Cloudflare/Nabu Casa tunnel: */
+const WEBHOOK_URL = "https://YOUR-TUNNEL.trycloudflare.com/api/webhook/witch_winner";
+
+/* Optional local testing (same network, no HTTPS):
+   add ?local=1 to the page URL and it will post to your LAN HA instead. */
+const LOCAL_HA_URL = "http://10.0.0.90:8123/api/webhook/witch_winner";
+/* ---------------------------- */
+
 function formatListWithAnd(raw){
   const parts = (raw || '')
     .split(',')
@@ -159,11 +149,27 @@ function updatePreview(){
 input.addEventListener('input', updatePreview);
 updatePreview();
 
-/* ====== Submit flow with two-stage messaging ====== */
-form.addEventListener('submit', (e)=>{
-  e.preventDefault();
+function pickWebhook() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('local') === '1') return LOCAL_HA_URL;
+  return WEBHOOK_URL;
+}
 
+async function sendToHA(formatted) {
+  const url = pickWebhook();
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    // We send a single string so it renders on one line in your overlay
+    body: JSON.stringify({ names: formatted })
+  });
+  if (!res.ok) throw new Error(`HA webhook error: ${res.status}`);
+}
+
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
   const formatted = formatListWithAnd(input.value);
+
   if (!formatted) {
     statusText.textContent = 'Add at least one name.';
     statusText.classList.add('show');
@@ -178,16 +184,28 @@ form.addEventListener('submit', (e)=>{
   statusText.classList.add('show');
   spinner.classList.add('show');
 
-  // After 5s: fade out text, swap to stage 2
+  try {
+    // Fire the webhook to HA (this triggers your whole finale)
+    await sendToHA(formatted);
+  } catch (err) {
+    // If this fails, show message and unlock form
+    spinner.classList.remove('show');
+    statusText.textContent = 'Could not reach the ritual altar. Check the tunnel URL.';
+    console.error(err);
+    [...form.elements].forEach(el => el.disabled = false);
+    return;
+  }
+
+  // After 6s: fade to stage 2 message
   setTimeout(()=>{
     statusText.classList.remove('show');
     setTimeout(()=>{
       statusText.textContent = '…the ritual is working…';
       statusText.classList.add('show');
-    }, 800); // match .8s fade
+    }, 800);
   }, 6000);
 
-  // After another 5s → navigate to the end page
+  // After another 6s → navigate to the end page
   setTimeout(()=>{
     window.location.href = './theend.html';
   }, 12000);
