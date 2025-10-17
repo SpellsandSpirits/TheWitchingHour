@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Opens at 8:00 PM</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; display:grid; min-height:100dvh; place-items:center; background:#0b0b0d; color:#eaeaea; }
+  .card { max-width: 520px; width: min(92vw, 520px); background:#141418; border:1px solid #26262b; border-radius:16px; padding:24px; box-shadow:0 8px 28px rgba(0,0,0,.35); text-align:center; }
+  h1 { margin:0 0 8px; font-size:1.25rem; }
+  .time { font-variant-numeric: tabular-nums; font-size:2rem; letter-spacing:.03em; margin:.35rem 0 1rem; }
+  .sub { opacity:.8; }
+  .btn { display:inline-block; margin-top:12px; border:1px solid #2c2c33; padding:10px 14px; border-radius:10px; text-decoration:none; color:#eaeaea; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Doors are sealed 🔒</h1>
+    <div id="when" class="sub"></div>
+    <div class="time" id="count">--:--:--</div>
+    <div class="sub">Pages unlock at <strong>8:00 PM</strong> (Denver time).</div>
+    <a class="btn" href="/">Back to home</a>
+    <noscript><p class="sub">Enable JavaScript to see the countdown.</p></noscript>
+  </div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const untilISO = params.get("until") || "2025-10-17T20:00:00-06:00";
+  const start = new Date(untilISO).getTime();
+
+  // Show the absolute target in Denver time (handles DST correctly for display)
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Denver",
+    dateStyle: "full",
+    timeStyle: "short"
+  });
+  document.getElementById("when").textContent = "Unlocks: " + fmt.format(new Date(start));
+
+  const el = document.getElementById("count");
+  function tick() {
+    const now = Date.now();
+    const diff = Math.max(0, start - now);
+    if (diff <= 0) {
+      // Unlock immediately when time hits
+      history.length > 1 ? history.back() : location.replace("/");
+      return;
+    }
+    const s = Math.floor(diff / 1000);
+    const hh = String(Math.floor(s / 3600)).padStart(2, "0");
+    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    el.textContent = `${hh}:${mm}:${ss}`;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>
