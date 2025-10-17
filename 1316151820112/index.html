@@ -23,14 +23,21 @@
     text-align: center;
   }
 
-  .toplabel {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: .18em;
-    color: #9b98a7;
-    opacity: .8;
-    margin-bottom: 15px;
-  }
+ .toplabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  color: #9b98a7;
+  opacity: .8;
+  margin-bottom: 15px;
+
+  /* Center with respect to the card below */
+  display: block;
+  max-width: 560px;      /* match the card width exactly */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
 
   .card {
     max-width: 560px;
