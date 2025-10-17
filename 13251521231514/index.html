@@ -117,9 +117,9 @@
 
 <script>
 /* ---------- CONFIG ---------- */
-const WEBHOOK_URL = "https://still-prep-jokes-communist.trycloudflare.com/api/webhook/witch_winner";
-/* ---------------------------- */
+const WEBHOOK_URL = "https://obcd0hoxy7b88v4sohkw6get6ca1x0t2.ui.nabu.casa/api/webhook/witch_winner";
 
+/* ---------- HELPERS ---------- */
 function formatListWithAnd(raw){
   const parts = (raw || '')
     .split(',')
@@ -144,16 +144,16 @@ function updatePreview(){
 input.addEventListener('input', updatePreview);
 updatePreview();
 
-/* CORS-safe webhook post (works from GitHub Pages → HA via Cloudflare) */
 async function sendToHA(formatted) {
-  await fetch(WEBHOOK_URL, {
+  const res = await fetch(WEBHOOK_URL, {
     method: "POST",
-    mode: "no-cors",                                // avoid CORS preflight
-    headers: { "Content-Type": "text/plain;charset=UTF-8" }, // CORS-simple type
-    body: JSON.stringify({ names: formatted })      // HA reads JSON body
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ names: formatted })
   });
+  if (!res.ok) throw new Error(`Webhook error ${res.status}`);
 }
 
+/* ---------- SUBMIT FLOW ---------- */
 form.addEventListener('submit', async (e)=>{
   e.preventDefault();
   const formatted = formatListWithAnd(input.value);
@@ -164,10 +164,7 @@ form.addEventListener('submit', async (e)=>{
     return;
   }
 
-  // Lock inputs to prevent double fire
   [...form.elements].forEach(el => el.disabled = true);
-
-  // Stage 1 — show first line + spinner
   statusText.textContent = '…something mysterious is happening…';
   statusText.classList.add('show');
   spinner.classList.add('show');
@@ -176,13 +173,12 @@ form.addEventListener('submit', async (e)=>{
     await sendToHA(formatted);
   } catch (err) {
     spinner.classList.remove('show');
-    statusText.textContent = 'Could not reach the ritual altar. Check the tunnel URL.';
+    statusText.textContent = 'Could not reach the ritual altar. Check remote access.';
     console.error(err);
     [...form.elements].forEach(el => el.disabled = false);
     return;
   }
 
-  // After 6s: fade to stage 2 message
   setTimeout(()=>{
     statusText.classList.remove('show');
     setTimeout(()=>{
@@ -191,7 +187,6 @@ form.addEventListener('submit', async (e)=>{
     }, 800);
   }, 6000);
 
-  // After another 6s → navigate to the end page
   setTimeout(()=>{
     window.location.href = './theend.html';
   }, 12000);
